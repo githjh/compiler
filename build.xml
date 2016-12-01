@@ -1,0 +1,103 @@
+<project name="Compiler" default="compile" basedir=".">
+  <property name="classes" location="classes" />
+  <property name="src"     location="src"     />
+  <property name="Absyn"   location="Absyn"   />
+  <property name="bin"     location="bin"     />
+  <property name="lib"     location="lib"     />
+  <property name="jflex"   location="jflex"   />
+  <property name="cup"     location="cup"     />
+  <property name="Parse"   location="Parse"   />
+  <property environment="env" />
+
+<!-- We rely on CUP-11a  JFlex 1.6.1  -->
+  <!-- residing in our directory ``bin'' -->
+ <path id="binaries">
+    <pathelement location="${bin}" />
+    <fileset dir="${bin}">
+      <include name="**/*.jar" />
+      <include name="**/*.zip" />
+    </fileset>
+    <pathelement path="${java.class.path}" />
+    <pathelement path="${classes}" />
+  </path>
+
+  <path id="libraries">
+    <pathelement location="${lib}" />
+    <fileset dir="${lib}">
+      <include name="**/*.jar" />
+      <include name="**/*.zip" />
+    </fileset>
+    <pathelement path="${java.class.path}" />
+  </path>
+
+  <!-- This is JFlex -->
+  <taskdef name="jflex" 
+           classname="jflex.anttask.JFlexTask" 
+           classpath="${bin}/jflex-1.6.1.jar" 
+  />
+  <!-- We also use CUP-TUM -->
+  <taskdef name="cup" 
+           classname="java_cup.anttask.CUPTask" 
+           classpath="${bin}/java-cup-11a.jar"
+  />
+
+  <target name="init">
+      <mkdir dir="${classes}"/>
+      <mkdir dir="${classes}/java_cup"/>
+      <copy todir="${classes}/java_cup"><fileset dir="${bin}/java_cup"/></copy>
+    <javac srcdir="${Absyn}"
+        destdir="${classes}"/>
+  </target>
+
+
+  <target name="cup" depends="init">
+    <cup srcfile="${Parse}/miniC.cup" 
+         destdir="${Absyn}" 
+         interface="true"
+   parser="Parser"
+    />
+  </target>
+
+  <target name="jflex" depends="cup">
+    <jflex file="${Parse}/miniC.jflex" destdir="${Absyn}" />
+  </target>
+
+  <target name="copy_src" depends="jflex">
+   <copy todir="${Absyn}">
+     <fileset dir="${src}" includes="**/**.java" />
+   </copy>
+  </target>
+
+  <target name="compile" depends="copy_src">
+    <javac srcdir="${Absyn}" destdir="${classes}" debug="on" includeantruntime="false">
+      <classpath refid="libraries" />
+    </javac>
+  </target>
+
+  <target name="dist" depends="compile">
+    <jar jarfile="${dist}/Compiler.jar" basedir="${classes}">
+     <manifest>
+       <attribute name="Main-Class" value="Main" />
+       <attribute name="Class-Path" value="java-cup-11a-runtime.jar" />
+     </manifest>
+    </jar>
+   <copy todir="${dist}">
+     <fileset dir="${lib}" includes="**/**.jar"/>
+   </copy>  
+
+  </target>
+
+  <target name="run" depends="dist">
+    <java jar="${dist}/Compiler.jar" fork="true">
+      <arg value="input.test" />
+    </java>
+  </target>
+
+  <target name="clean">
+      <delete file="${Absyn}/Parser.java" />
+      <delete file="${Absyn}/Scanner.java" />
+      <delete file="${Absyn}/sym.java" />
+      <delete dir="${classes}" />
+    <delete dir="${dist}" />
+  </target>
+</project>
