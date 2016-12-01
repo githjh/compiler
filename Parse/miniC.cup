@@ -165,10 +165,10 @@ identlist ::= ident:id {:
 
 ident ::= ID:id{:
             //System.out.println("Identifier := ID'"+id+"'");
-            RESULT = new Ident(0,id, null);
+            RESULT = new Ident(0,id, null, idleft, idright);
             :}
         |   ID:id LSQ INT_N:k RSQ:r{://System.out.println("Identifier := ID'"+id+"'["+k+"]");
-            RESULT = new Ident(1, id, k);
+            RESULT = new Ident(1, id, k, idleft, idright);
             :}
         ;
 

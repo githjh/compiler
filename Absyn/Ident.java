@@ -7,11 +7,15 @@ class Ident extends Absyn
     String name;
     int isArray;
     String ar_num;
-    public Ident(int isA, String n, String array_num) 
+    int line;
+    int pos;
+    public Ident(int isA, String n, String array_num, int _line, int _pos) 
     {
         name = n;
         isArray = isA;
         ar_num = array_num;
+        line = _line;
+        pos = _pos;
     }
     public void printAST()
     {
@@ -37,9 +41,12 @@ class Ident extends Absyn
         else{
             this_type = new Type(1);
         }
-        my_Symbol my_s = new my_Symbol(this_type, name, false, scope_level);
-        if(SymbolTable.find(name) != null)
-            System.out.println("previous declaration :"+name);
+        my_Symbol my_s = new my_Symbol(this_type, name, false, scope_level, line, pos);
+        my_Symbol find_s = SymbolTable.find(name);
+        if(find_s != null)
+            System.out.println("SYMENTIC ERROR "+line+":"+pos
+                +" note: previous declaration of "+name
+                +" : " + find_s.getLine()+":" +find_s.getPos());
         if(isArray == 1){
             my_s.setisArray(true);
         }

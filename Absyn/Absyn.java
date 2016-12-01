@@ -9,14 +9,18 @@ class my_Symbol {
 	String name;
 	boolean isParam;
 	boolean isArray;
-	
-	public my_Symbol(Type _ty, String _name, boolean _isParam, int _scope_level)
+	int line;
+	int pos;
+	public my_Symbol(Type _ty, String _name, boolean _isParam,
+	 int _scope_level, int _line, int _pos)
 	{
 		ty = _ty;
 		name = _name;
 		isParam = _isParam;
 		scope_level = _scope_level;
 		isArray = false;
+		line = _line;
+		pos = _pos;
 	}
 	
 	public String getName()
@@ -34,6 +38,12 @@ class my_Symbol {
 	public boolean getisArray()
 	{
 		return isArray;
+	}
+	public int getLine(){
+		return line;
+	}
+	public int getPos(){
+		return pos;
 	}
 
 }

@@ -600,6 +600,18 @@ class IDExpr extends Expr{
             return -1;
         }
         else{
+            boolean my_s_isArr = my_s.getisArray();
+
+            if(isArray == true && my_s_isArr == false)
+            {
+                System.out.println("SYMENTIC ERROR "+line+":"+pos
+                +" note: "+ name + " is not an array");
+            }
+            else if(isArray == false && my_s_isArr == true)
+            {
+                System.out.println("SYMENTIC ERROR "+line+":"+pos
+                +" note: "+ name + " is an array");
+            }
             return my_s.getType();
         }
     }
