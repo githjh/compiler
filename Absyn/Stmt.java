@@ -566,11 +566,15 @@ class IDExpr extends Expr{
     String name;
     Expr expr;
     boolean isArray;
-    public IDExpr(String n, Expr e, boolean isA)
+    int line;
+    int pos;
+    public IDExpr(String n, Expr e, boolean isA, int _line, int _pos)
     {
         name = n;
         expr = e;
         isArray = isA;
+        line = _line;
+        pos = _pos;
     }
     public void printAST()
     {
@@ -591,7 +595,8 @@ class IDExpr extends Expr{
         my_Symbol my_s = SymbolTable.find(name);
         if(my_s == null)
         {
-            System.out.println(name + " is not declared");
+            System.out.println("SYMENTIC ERROR "+line+":"+pos
+                +" note: "+ name + " is not declared");
             return -1;
         }
         else{

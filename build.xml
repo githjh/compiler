@@ -97,6 +97,7 @@
       <delete file="${Absyn}/Parser.java" />
       <delete file="${Absyn}/Scanner.java" />
       <delete file="${Absyn}/sym.java" />
+      <delete dir = "${Absyn}/Absyn" />
       <delete dir="${classes}" />
     <delete dir="${dist}" />
   </target>

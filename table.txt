@@ -1,0 +1,40 @@
+Function name :func
+count   Type   name   array       role
+    1    int      a          parameter
+    2    int   test           variable
+
+Function name :main
+count   Type   name   array       role
+    1    int      a          parameter
+    2    int   test           variable
+    3    int    arr      10   variable
+
+Function name:main - compound(1)
+count   Type   name   array       role
+    2    int   test           variable
+    3    int   test           variable
+
+Function name:main - compound(1) - compound(2)
+count   Type   name   array       role
+    2    int      b           variable
+
+Function name:main - compound(1) - compound(2) - if(1)
+count   Type   name   array       role
+    1    int      b           variable
+
+Function name:main - compound(1) - compound(2)
+count   Type   name   array       role
+    2    int      c           variable
+
+Function name:main - compound(1) - compound(2)
+count   Type   name   array       role
+    2    int      b           variable
+
+Function name:main - while(1)
+count   Type   name   array       role
+    1    int      i           variable
+
+Function name:main - for(1)
+count   Type   name   array       role
+    1    int      c           variable
+

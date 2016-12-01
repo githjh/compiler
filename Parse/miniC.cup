@@ -405,11 +405,11 @@ expr ::= SUB:m expr:e {:
                 //System.out.println("Expr := FLOAT("+k+")");
                 :}
         |   ID:i {: 
-                RESULT = new IDExpr(i, null, false);
+                RESULT = new IDExpr(i, null, false, ileft, iright);
                 //System.out.println("Expr := ID:'"+i+"'");
                 :}
         |   ID:i LSQ expr:e RSQ:r {: 
-                RESULT = new IDExpr(i, e, true);
+                RESULT = new IDExpr(i, e, true, ileft, iright);
                 //System.out.println("Expr := ID:'"+i+"' [Expr]");
                 :}
         |   LPR:l expr:e RPR:r {: 
