@@ -1,0 +1,64 @@
+ID 	 : 20120962
+Name : Jaehyeong Ha
+
+-How to use
+
+1)build
+
+type ant
+
+2)run
+	java -classpath classes/ Absyn.Parser filename.c
+	
+	symentic analisis will be printed
+
+	--print AST && Symbol Table 
+	실행방법은 이전과 동일합니다.
+	tree.txt에는 c style의 AST가 출력되어 나옵니다.
+	table.txt에는 symbol table이 출력되어 나옵니다.
+
+3) clean
+type ant clean
+
+4) test and expeceted result
+
+ant
+java -classpath classes Parse simple_if.c
+
+AST(tree.txt)
+--------------------
+int main(int a){
+if(a==0)
+if(a==1)
+if(a==2)
+....
+
+Symbol Table(table.txt)
+--------------------
+Function name: Global 
+count   Type   name   array       role
+    1    int      a           variable
+
+Function name :main
+count   Type   name   array       role
+    1    int      a          parameter
+    2    int      a           variable
+....
+
+--------------------
+
+Symentic Check (console result)
+--------------------
+previous declaration :a
+previous declaration :test
+previous declaration :test
+previous declaration :b
+d is not declared
+....
+--------------------
+
+-version
+
+jflex-1.6.1
+java-cup-11a
+jdk 1.8

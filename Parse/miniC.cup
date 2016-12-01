@@ -1,0 +1,430 @@
+package Absyn;
+
+import java_cup.runtime.*;
+import java.util.ArrayList;
+import java.io.*;
+
+//import Absyn.*;
+
+parser code {:
+        public static String file;
+        public static Scanner s;
+        public static void main (String args[]) throws Exception{
+        if(args.length == 0)
+        {
+            System.out.println("No File Input");
+            System.exit(-1);
+        }
+        
+        FileWriter fw = null;
+        FileWriter fw2 = null;
+        try{
+            fw = new FileWriter("tree.txt");
+            fw2 = new FileWriter("table.txt");
+        }
+        catch(IOException e){
+            System.out.println("create file error");
+        }
+
+        Writer astwriter2 = new BufferedWriter(fw);
+        Writer symWriter = new BufferedWriter(fw2);
+        myPrint.setASTWriter(astwriter2);
+        myPrint.setSYMWriter(symWriter);
+
+        file = args[0];
+        InputStream is = new FileInputStream(args[0]);
+        Reader reader = new InputStreamReader(is);
+        Scanner scanner = new Scanner(reader);
+        Parser p = new Parser(scanner);
+        p.parse();
+        s = (Scanner)p.getScanner();
+
+       
+
+        try{
+            astwriter2.close();
+            symWriter.close();
+        }
+         catch(IOException e){
+          System.out.println("close error");
+         }
+        ArrayList<String> serr = s.getErrors();
+        if(serr.size()>0){
+            for(String err : serr)
+                System.out.println(args[0] + ": " + err);
+            System.exit(-1);
+        }
+    }
+    /* error line print function : override*/
+    public void syntax_error(Symbol cur_token) {
+        Scanner s = (Scanner) this.getScanner();
+        System.out.println(file + ": " + s.yyline() + ":" + s.yycolumn()
+     + ": error: parse error ");
+        System.exit(-1);
+    }
+:}
+
+terminal WHILE,DO,FOR,IF,ELSE,SWITCH,CASE,DEFAULT,BREAK,ASSIGN,LBR,RBR,LPR,RPR,LSQ,RSQ,COMMA,COLON,INT,FLOAT,RETURN;
+
+/* now we just print */
+terminal String ID;
+terminal String INT_N;
+terminal String FLOAT_N;
+terminal String UMINUS,MUL,DIV,ADD,SUB,LT,GT,LTE,GTE,EQ,NEQ,SEMI;
+
+non terminal Program program;
+non terminal DeclList decllist;
+non terminal FuncList funclist;
+non terminal Decl     decl;
+non terminal IdentList identlist;
+non terminal Ident ident;
+non terminal Function function;
+non terminal ParamList paramlist;
+non terminal Type type;
+non terminal CompStmt compoundstmt;
+non terminal StmtList stmtlist;
+non terminal Stmt stmt;
+non terminal AssignStmt assignstmt;
+non terminal Assign assign;
+non terminal CallStmt callstmt;
+non terminal Call call;
+non terminal RetStmt retstmt;
+non terminal WhileStmt whilestmt;
+non terminal ForStmt forstmt;
+non terminal IfStmt ifstmt;
+non terminal SwitchStmt switchstmt;
+non terminal CaseList caselist;
+non terminal Expr expr;
+non terminal ArgList arglist;
+
+/* The highest priority is last one, and the lowest priority is upper one */
+precedence right    ASSIGN;
+precedence left     EQ, NEQ;
+precedence left     LT, GT, LTE, GTE;
+precedence left     ADD, SUB;
+precedence left     MUL, DIV;
+precedence right    UMINUS;
+precedence left     LBR, RBR;
+/* for avoiding if else conflict */
+precedence left     ELSE;
+
+start with program;
+
+/* grammer rule */
+program ::= decllist:dl funclist:fl {:
+            //System.out.println("Program := DeclList FuncList");
+            Program p = new Program(dl,fl);
+         :}
+        |   decllist:dl {: 
+            //System.out.println("Program := DeclList");
+            Program p = new Program(dl,null);
+         :}
+        |   funclist:fl {: 
+            //System.out.println("Program := FuncList"); 
+            Program p = new Program(null, fl);
+        :}
+        |   {:  
+            //System.out.println("Program := epsilon"); 
+            Program p = new Program (null, null);
+        :}
+        ;
+
+decllist ::= decl:d {: 
+            //System.out.println("DeclList := Declaration"); 
+            DeclList dl = new DeclList();
+            RESULT = dl.append(d);
+    :}
+        |   decllist:dl decl:d {:RESULT = dl.append(d);
+                //System.out.println("DeclList := Declaration");
+                :}
+        ;
+
+funclist ::= function:f {://System.out.println("FuncList := Function"); 
+            FuncList fl = new FuncList();
+            RESULT = fl.append(f);
+         :}
+        |   funclist:fl function:f {: RESULT = fl.append(f);
+                //System.out.println("FuncList := FuncList Function"); 
+                :}
+        ;
+
+decl ::= type:t identlist:il SEMI:s {://System.out.println("Declaration := Type IdentList ;");
+            RESULT =  new Decl(t,il);
+        :}
+        ;
+
+identlist ::= ident:id {: 
+            //System.out.println("IdentList := Identifier");  
+            IdentList il = new IdentList();
+            RESULT = il.append(id,1);
+        :}
+        |   identlist:idl COMMA ident:id{: RESULT = idl.append(id,1);
+                //System.out.println("IdentList := IdentList, Identifier");
+                :} 
+        ;
+
+ident ::= ID:id{:
+            //System.out.println("Identifier := ID'"+id+"'");
+            RESULT = new Ident(0,id, null);
+            :}
+        |   ID:id LSQ INT_N:k RSQ:r{://System.out.println("Identifier := ID'"+id+"'["+k+"]");
+            RESULT = new Ident(1, id, k);
+            :}
+        ;
+
+function ::= type:t ID:fn LPR RPR compoundstmt:cs {: 
+            RESULT = new Function(t,fn,null,cs);
+            //System.out.println("Function := Type ID:'"+fn+"' ( ) CompoundStmt");
+            :}
+        |   type:t ID:fn LPR paramlist:pl RPR compoundstmt:cs {:
+            RESULT = new Function(t,fn,pl,cs);
+            //System.out.println("Function := Type ID:'"+fn+"' (ParamList) CompoundStmt");
+            :}
+        ;
+
+paramlist ::= type:t ident:id{:
+            //System.out.println("ParamList := Type Ident");
+            ParamList pl = new ParamList(t,id);
+            pl.append(t,id);
+            RESULT = pl;
+            :}
+        |   paramlist:pl COMMA type:t ident:id{:
+            pl.append(t,id);
+            RESULT = pl;
+            //System.out.println("ParamList := ParamList , Type Ident");
+            :}
+        ;
+
+type ::=INT:in{: //System.out.println("Type := int");
+            RESULT = new Type(0);
+        :}
+        |   FLOAT:fl {://System.out.println("Type := float");
+            RESULT = new Type(1);
+        :}
+        ;
+
+compoundstmt ::= LBR:l stmtlist:sl RBR:r {:
+                RESULT = new CompStmt(null, sl);
+                //System.out.println("CompoundStmt := { StmtList }");
+                :}
+        |   LBR:l decllist:dl stmtlist:sl RBR:r{:
+                RESULT = new CompStmt(dl,sl);
+                //System.out.println("CompoundStmt := { DeclList StmtList}");
+                :}
+        ;
+
+stmtlist ::= stmtlist:stl stmt:s{:
+                RESULT = stl.append(s);
+                //System.out.println("StmtList := StmtList Stmt");
+                :}
+        |   {:
+                RESULT = new StmtList();  
+                 //System.out.println("StmtList := epsilon");
+                 :}
+        ;
+
+stmt ::=    assignstmt:as {:RESULT = as;
+                //System.out.println("Stmt := AssignStmt");
+                :}
+        |   callstmt:ca {: RESULT = ca;
+                //System.out.println("Stmt := CallStmt");
+                :}
+        |   retstmt:re {: RESULT = re;
+                //System.out.println("Stmt := RetStmt");
+                :}
+        |   whilestmt:wh {: RESULT = wh;
+                //System.out.println("Stmt := WhileStmt");
+                :}
+        |   forstmt:fo {: RESULT = fo;
+                //System.out.println("Stmt := ForStmt");
+                :}
+        |   ifstmt:ifs{: RESULT = ifs;
+                //System.out.println("Stmt := ifStmt");
+                :}
+        |   switchstmt:sw {: RESULT = sw;
+                //System.out.println("Stmt := SwithStmt");
+                :}
+        |   compoundstmt:co {: RESULT = co;
+                //System.out.println("Stmt := CallStmt");
+                :}
+        |   SEMI:s{: RESULT = new Semi(s);
+                //System.out.println("Stmt := ;");
+                :}
+        ;
+
+assignstmt ::=assign:a SEMI:s {:
+                RESULT = new AssignStmt(a);
+                //System.out.println("AssignStmt := Assign;");
+                :}
+        ;
+
+assign ::=ID:id ASSIGN expr:e{:
+                RESULT = new Assign(id, null, e);
+                //System.out.println("Assign := ID = Expr");
+                :}
+        |   ID:id LSQ expr:idx RSQ ASSIGN expr:e {:
+                RESULT = new Assign(id, idx, e);
+                //System.out.println("Assign := ID:'"+ id + "' [ Expr ] = Expr");
+                :}
+        ;
+
+callstmt ::=call:c SEMI:s{:
+                RESULT = new CallStmt(c);
+                //System.out.println("CallStmt := Call ;");
+                :}
+        ;
+
+call ::= ID:id LPR arglist:al RPR:r{:
+                RESULT = new Call(id, al);
+                //System.out.println("Call := ID:'" + id + "' ( ArgList )");
+                :}
+        | ID:id LPR RPR:r{:
+                RESULT = new Call(id, null);
+                //System.out.println("Call := ID:'" + id + "' ( )");
+                :}
+        ;
+
+retstmt ::= RETURN:r SEMI:s {: 
+                RESULT = new RetStmt(null);
+                //System.out.println("RetStmt := return;");
+                :}
+        |   RETURN:r expr:e SEMI:s {: 
+                RESULT = new RetStmt(e);
+                //System.out.println("RetStmt := return Expr;");
+                :}
+        ;
+
+ifstmt ::= IF:i LPR expr:cond RPR stmt:st1 {:    
+                RESULT = new IfStmt(cond,st1, null);
+                //System.out.println("IfStmt := if (Expr) Stmt");
+                :} 
+        |  IF:i LPR expr:cond RPR stmt:st1 ELSE stmt:st2 {: 
+                RESULT = new IfStmt(cond,st1,st2);
+                //System.out.println("IfStmt := if (Expr) Stmt else Stmt");
+                :}
+        ;
+
+whilestmt ::=WHILE:w LPR expr:e RPR stmt:st{:
+            RESULT =  new WhileStmt(e,st,false);
+            //System.out.println("WhileStmt := while (Expr) Stmt ;");
+            :}
+        |   DO:d stmt:st WHILE LPR expr:e RPR SEMI:s{:  
+            RESULT =  new WhileStmt(e,st,true);
+            //System.out.println("WhileStmt : = do Stmt while (Expr) ;");
+            :}
+        ;
+
+forstmt ::=  FOR:f LPR assign:init SEMI expr:cond SEMI assign:as RPR stmt:st{:
+                RESULT = new ForStmt(init, cond, as, st);
+                //System.out.println("ForStmt := for (Assign; Expr; Assign) Stmt");
+            :}
+        ;
+/* switch case statements */
+switchstmt ::=
+            SWITCH:s LPR ident:id RPR LBR caselist:cl RBR:r{:
+            RESULT = new SwitchStmt(id, cl, null, false);
+                //System.out.println("SwitchStmt := switch (Identifier) {CaseList}");
+                :}
+        |   SWITCH:s LPR ident:id RPR LBR caselist:cl DEFAULT COLON stmtlist:ds RBR:r{:
+            RESULT = new SwitchStmt(id, cl, ds, false);
+            //System.out.println("SwitchStmt := switch (Identifier) { CaseList default : StmtList }");
+            :}
+        |   SWITCH:s LPR ident:id RPR LBR caselist:cl DEFAULT COLON stmtlist:ds BREAK SEMI RBR:r{:
+            RESULT = new SwitchStmt(id, cl, ds, true);
+            //System.out.println("SwitchStmt := switch (Identifier) { CaseList default : StmtList break ; }");
+            :}
+        ;
+
+caselist ::=  caselist:cl CASE:c INT_N:int_n COLON stmtlist:sl {:
+                RESULT = cl.append(int_n, sl, false);
+                //System.out.println("CaseList := CaseList case INT("+int_n+") : StmtList");
+                :}
+        |   caselist:cl CASE:c INT_N:int_n COLON stmtlist:sl BREAK SEMI:s{:
+                RESULT = cl.append(int_n, sl, true);
+                //System.out.println("CaseList := CaseList case INT("+int_n+") : StmtList break;");
+                :}
+        |   {:RESULT = new CaseList();
+            //System.out.println("CaseList :=");
+            :}
+        ;
+
+expr ::= SUB:m expr:e {:
+                RESULT = new UnOpExpr(m,e);
+                //System.out.println("Expr := - Expr");
+                :} %prec UMINUS
+        |   expr:l ADD:op expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr + Expr");
+                :}
+        |   expr:l SUB:op expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr - Expr");
+                :}
+        |   expr:l MUL:op expr:r {: 
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr * Expr");
+                :}
+        |   expr:l DIV:op expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr / Expr");
+                :}
+        |   expr:l LT:op  expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr <  Expr");
+                :}
+        |   expr:l GT:op  expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr > Expr");
+                :}
+        |   expr:l LTE:op expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr <= Expr");
+                :}
+        |   expr:l GTE:op expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr >= Expr");
+                :}
+        |   expr:l EQ:op  expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr == Expr");
+                :}
+        |   expr:l NEQ:op expr:r {:
+                RESULT = new BinOpExpr(l,op,r);
+                //System.out.println("Expr := Expr != Expr");
+                :}
+        |   call:c {: 
+                RESULT = new CallExpr(c);
+                //System.out.println("Expr := Call");
+                :}
+        |   INT_N:k {:
+                RESULT = new Num(k, 0);
+                //System.out.println("Expr := INT("+k+")");
+                :}
+        |   FLOAT_N:k {: 
+                RESULT = new Num(k, 1);
+                //System.out.println("Expr := FLOAT("+k+")");
+                :}
+        |   ID:i {: 
+                RESULT = new IDExpr(i, null, false);
+                //System.out.println("Expr := ID:'"+i+"'");
+                :}
+        |   ID:i LSQ expr:e RSQ:r {: 
+                RESULT = new IDExpr(i, e, true);
+                //System.out.println("Expr := ID:'"+i+"' [Expr]");
+                :}
+        |   LPR:l expr:e RPR:r {: 
+            RESULT = e;
+            //System.out.println("Expr := (Expr)");
+            :}
+        ;
+
+arglist ::= arglist:argl COMMA expr:e {:
+            RESULT = argl.append(e);
+            //System.out.println("ArgList := ArgList, Expr");
+            :}
+        |   expr:e {: 
+            ArgList al = new ArgList();
+            RESULT = al.append(e);
+            //System.out.println("ArgList := Expr");
+            :}
+        ;
