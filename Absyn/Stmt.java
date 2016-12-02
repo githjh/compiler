@@ -133,6 +133,8 @@ class Assign extends Absyn
             String as_str = typetoString(as_type);
             String ex_str = typetoString(ex_type);
 
+            expr.printSYM(n, names, depth, is_func_comp, name_print);
+
             if(as_type != ex_type){
                 System.out.println("Warning : "+line+":"+pos
                     +" note: "+name+" : "+ex_str +" value is assigned to an "
@@ -180,12 +182,14 @@ class Call extends Absyn
 {
     String name;
     ArgList args;
-
-    public Call(String n, ArgList al)
+    int line;
+    int pos;
+    public Call(String n, ArgList al,int _line, int _pos)
     {
         name = n;
         args = al;
-
+        line = _line;
+        pos = _pos;
     }
     public void printAST()
     {
@@ -202,7 +206,8 @@ class Call extends Absyn
         Function func = SymbolTable.find_func(name);
         if(func == null)
         {
-            System.out.println("Function "+name+" is not declared");
+            System.out.println("SYMENTIC ERROR "+line+":"+pos +" function '"
+             +name+"' is not declared");
         }
          // myPrint.symWriter.write(name);
          // myPrint.symWriter.write("(");
@@ -214,6 +219,17 @@ class Call extends Absyn
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth)
     {
         
+    }
+    public int getType(){
+        int ty;
+        Function func = SymbolTable.find_func(name);
+        if(func == null){
+            ty = -1;
+        }
+        else{
+            ty = func.getType();
+        }
+        return ty;
     }
 }
 
@@ -666,7 +682,7 @@ class CallExpr extends Expr{
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print)
     {
-        
+        cl.printSYM(n,names, depth, is_func_comp, name_print);
     }
     public int getExprType(){
         return 999;

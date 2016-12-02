@@ -53,5 +53,8 @@ public class Function extends Absyn
     {
         return name;
     }
+    public int getType(){
+        return t.typecheck();
+    }
 }
 

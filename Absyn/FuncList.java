@@ -35,6 +35,11 @@ public class FuncList extends Absyn
             f.printSYM();
             SymbolTable.addFunction(f);
         }
+        //ArrayList<Function> func_table = SymbolTable.getTable().f_table;
+        //for(Function func : func_table ){
+        //  System.out.println(func.getname());
+        //  
+        //}
     }
 }
 

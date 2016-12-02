@@ -275,11 +275,11 @@ callstmt ::=call:c SEMI:s{:
         ;
 
 call ::= ID:id LPR arglist:al RPR:r{:
-                RESULT = new Call(id, al);
+                RESULT = new Call(id, al, idleft, idright);
                 //System.out.println("Call := ID:'" + id + "' ( ArgList )");
                 :}
         | ID:id LPR RPR:r{:
-                RESULT = new Call(id, null);
+                RESULT = new Call(id, null, idleft, idright);
                 //System.out.println("Call := ID:'" + id + "' ( )");
                 :}
         ;
