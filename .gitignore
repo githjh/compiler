@@ -93,3 +93,8 @@ classes/java_cup/symbol_set.class
 classes/java_cup/terminal.class
 classes/java_cup/terminal_set.class
 classes/java_cup/version.class
+Absyn/Absyn/Parser.java
+Absyn/Absyn/Scanner.java
+Absyn/Absyn/sym.java
+table.txt
+tree.txt

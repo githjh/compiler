@@ -98,12 +98,15 @@ class Assign extends Absyn
     String name;
     Expr in_expr;
     Expr expr;
-
-    public Assign(String n, Expr idx, Expr ex) 
+    int line;
+    int pos;
+    public Assign(String n, Expr idx, Expr ex, int _line, int _pos) 
     {
         name = n;
         in_expr = idx;
         expr = ex;
+        line = _line;
+        pos = _pos;
     }
     public void printAST(){
         myPrint.astWriter.write(name);
@@ -121,23 +124,29 @@ class Assign extends Absyn
         my_Symbol my_s  = SymbolTable.find(name);
         if(my_s == null)
         {
-            System.out.println(name+" is not declared");
+             System.out.println("SYMENTIC ERROR "+line+":"+pos
+                +" note: "+ name+" is not declared");
         }
         else{
             int as_type = my_s.getType();
             int ex_type = expr.getExprType();
+            String as_str = typetoString(as_type);
+            String ex_str = typetoString(ex_type);
+
             if(as_type != ex_type){
-                System.out.println("warning "+name+" is type miss match");
+                System.out.println("Warning : "+line+":"+pos
+                    +" note: "+name+" : "+ex_str +" value is assigned to an "
+                    +as_str +" variable");
             }
             if(in_expr != null && my_s.getisArray() == false){
-                System.out.println("warning "+name+" is not array");
+                System.out.println("Warning "+in_expr.getLine()+":"+in_expr.getPos()
+                    +" note: "+name+" is not array");
             }
             if(in_expr != null && my_s.getisArray() == true && in_expr.getExprType() == 1)
             {
-                System.out.println("warning "+name+" array index must be Integer");   
+                System.out.println("SYMENTIC ERROR "+in_expr.getLine()+":"+in_expr.getPos()
+                    +" note: "+ "array subscript is not an interger");   
             }
-
-
         }
 
     }
@@ -531,43 +540,46 @@ class CaseList extends Absyn
     }
 }
 
-abstract class Expr extends Absyn 
+class Expr extends Absyn 
 {
-    abstract public void printAST();
-    abstract public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
-        int is_func_comp, int name_print);
-    abstract public int getExprType();
-    abstract public void ExprValidCheck();
+    int line;
+    int pos;
+    int ty;
+    public void printAST(){};
+    public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
+        int is_func_comp, int name_print){};
+    public int getExprType(){
+    //    System.out.println("getExprType");
+    //    System.out.println(pos);
+        return ty;
+    };
+    public void ExprValidCheck(){};
+    public int getLine(){
+        return line;
+    }
+    public int getPos(){
+        return pos;
+    }
 }
 class Num extends Expr{
     String num;
-    int ty;
-    public Num(String n, int _ty)
+    public Num(String n, int _ty, int _line, int _pos)
     {
         num = n;
         ty = _ty;
+        line = _line;
+        pos = _pos;
     }
     public void printAST()
     {
         myPrint.astWriter.write(num);
     }
-    public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
-        int is_func_comp, int name_print)
-    {
-
-    }
-    public int getExprType(){
-        return ty;
-    }
-    public void ExprValidCheck(){}
 
 }
 class IDExpr extends Expr{
     String name;
     Expr expr;
     boolean isArray;
-    int line;
-    int pos;
     public IDExpr(String n, Expr e, boolean isA, int _line, int _pos)
     {
         name = n;
@@ -615,14 +627,15 @@ class IDExpr extends Expr{
             return my_s.getType();
         }
     }
-    public void ExprValidCheck(){}
 }
 class UnOpExpr extends Expr{
     String op;
     Expr e1;
-    public UnOpExpr(String _op, Expr _e1){
+    public UnOpExpr(String _op, Expr _e1, int _line, int _pos){
         e1 = _e1;
         op = _op;
+        line = _line;
+        pos = _pos;
     }
     public void printAST()
     {
@@ -637,13 +650,14 @@ class UnOpExpr extends Expr{
     public int getExprType(){
         return e1.getExprType();
     }
-    public void ExprValidCheck(){}
 }
 class CallExpr extends Expr{
     Call cl;
-    public CallExpr(Call _cl)
+    public CallExpr(Call _cl, int _pos, int _line)
     {
         cl = _cl;
+        line = _line;
+        pos = _pos;
     }
     public void printAST()
     {
@@ -657,17 +671,19 @@ class CallExpr extends Expr{
     public int getExprType(){
         return 999;
     }
-     public void ExprValidCheck(){}
 
 }
 class BinOpExpr extends Expr{
     String op;
     Expr e1;
     Expr e2;
-    public BinOpExpr(Expr _e1, String _op, Expr _e2){
+    
+    public BinOpExpr(Expr _e1, String _op, Expr _e2, int _line, int _pos){
         e1 = _e1;
         op = _op;
         e2 = _e2;
+        line = _line;
+        pos = _pos;
     }
     public void printAST()
     {
@@ -689,7 +705,10 @@ class BinOpExpr extends Expr{
         if ( (e1_type != -1) && (e1_type != -1)
             && (e1_type != e2_type))
         {
-            System.out.println("expr miss match");
+            System.out.println("Warning : "+line+":"+pos
+                    +" note: " +typetoString(e1_type) +" " + op + " "
+                    + typetoString(e2_type) 
+                    +" expr type miss match");
         }
     }
 }

@@ -259,11 +259,11 @@ assignstmt ::=assign:a SEMI:s {:
         ;
 
 assign ::=ID:id ASSIGN expr:e{:
-                RESULT = new Assign(id, null, e);
+                RESULT = new Assign(id, null, e, idleft, idright);
                 //System.out.println("Assign := ID = Expr");
                 :}
         |   ID:id LSQ expr:idx RSQ ASSIGN expr:e {:
-                RESULT = new Assign(id, idx, e);
+                RESULT = new Assign(id, idx, e, idleft, idright);
                 //System.out.println("Assign := ID:'"+ id + "' [ Expr ] = Expr");
                 :}
         ;
@@ -349,59 +349,59 @@ caselist ::=  caselist:cl CASE:c INT_N:int_n COLON stmtlist:sl {:
         ;
 
 expr ::= SUB:m expr:e {:
-                RESULT = new UnOpExpr(m,e);
+                RESULT = new UnOpExpr(m,e, eleft, eright);
                 //System.out.println("Expr := - Expr");
                 :} %prec UMINUS
         |   expr:l ADD:op expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r, lleft, lright);
                 //System.out.println("Expr := Expr + Expr");
                 :}
         |   expr:l SUB:op expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r, lleft, lright);
                 //System.out.println("Expr := Expr - Expr");
                 :}
         |   expr:l MUL:op expr:r {: 
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r, lleft, lright);
                 //System.out.println("Expr := Expr * Expr");
                 :}
         |   expr:l DIV:op expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r, lleft, lright);
                 //System.out.println("Expr := Expr / Expr");
                 :}
         |   expr:l LT:op  expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r, lleft, lright);
                 //System.out.println("Expr := Expr <  Expr");
                 :}
         |   expr:l GT:op  expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r,  lleft, lright);
                 //System.out.println("Expr := Expr > Expr");
                 :}
         |   expr:l LTE:op expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r, lleft, lright);
                 //System.out.println("Expr := Expr <= Expr");
                 :}
         |   expr:l GTE:op expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r,  lleft, lright);
                 //System.out.println("Expr := Expr >= Expr");
                 :}
         |   expr:l EQ:op  expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r,  lleft, lright);
                 //System.out.println("Expr := Expr == Expr");
                 :}
         |   expr:l NEQ:op expr:r {:
-                RESULT = new BinOpExpr(l,op,r);
+                RESULT = new BinOpExpr(l,op,r,  lleft, lright);
                 //System.out.println("Expr := Expr != Expr");
                 :}
         |   call:c {: 
-                RESULT = new CallExpr(c);
+                RESULT = new CallExpr(c, cleft, cright);
                 //System.out.println("Expr := Call");
                 :}
         |   INT_N:k {:
-                RESULT = new Num(k, 0);
+                RESULT = new Num(k, 0, kleft, kright);
                 //System.out.println("Expr := INT("+k+")");
                 :}
         |   FLOAT_N:k {: 
-                RESULT = new Num(k, 1);
+                RESULT = new Num(k, 1, kleft, kright);
                 //System.out.println("Expr := FLOAT("+k+")");
                 :}
         |   ID:i {: 

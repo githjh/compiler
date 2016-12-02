@@ -122,4 +122,17 @@ public class Absyn  {
 
 	public Absyn(){
 	}
+	public String typetoString(int ty){
+        String ret;
+        if (ty == 0){
+            ret = "integer";
+        }
+        else if (ty == 1){
+            ret = "float";
+        }
+        else{
+             ret = null;
+        }
+        return ret;
+    }
 }
