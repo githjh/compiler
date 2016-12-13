@@ -8,6 +8,7 @@ public class myPrint {
   private Writer writer;
   static myPrint astWriter;
   static myPrint symWriter;
+  static myPrint codeWriter;
   public myPrint(Writer writer){
   	this.writer = writer;
   }
@@ -17,6 +18,9 @@ public class myPrint {
   }
   public static void setSYMWriter(Writer writer){
     symWriter = new myPrint(writer);
+  }
+  public static void setCODEWriter(Writer writer){
+    codeWriter = new myPrint(writer);
   }
 
   public void write(String s)

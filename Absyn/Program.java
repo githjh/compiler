@@ -27,6 +27,12 @@ public class Program extends Absyn {
       fl.printSYM();
       // System.out.println("program after");
     }
+    // code writer
+
+    //System.out.println("test");
+    myPrint.codeWriter.write("test");
+    //System.out.println("test2");
+    
   //  System.out.println("test");
   //  for(my_Symbol my_s : SymbolTable.getTable().s_table){
   //    System.out.println(my_s.name);

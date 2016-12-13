@@ -18,9 +18,11 @@ parser code {:
         
         FileWriter fw = null;
         FileWriter fw2 = null;
+        FileWriter fw_code = null;
         try{
             fw = new FileWriter("tree.txt");
             fw2 = new FileWriter("table.txt");
+            fw_code = new FileWriter("code.T");
         }
         catch(IOException e){
             System.out.println("create file error");
@@ -28,8 +30,10 @@ parser code {:
 
         Writer astwriter2 = new BufferedWriter(fw);
         Writer symWriter = new BufferedWriter(fw2);
+        Writer codeWriter = new BufferedWriter(fw_code);
         myPrint.setASTWriter(astwriter2);
         myPrint.setSYMWriter(symWriter);
+        myPrint.setCODEWriter(codeWriter);
 
         file = args[0];
         InputStream is = new FileInputStream(args[0]);
@@ -44,6 +48,7 @@ parser code {:
         try{
             astwriter2.close();
             symWriter.close();
+            codeWriter.close();
         }
          catch(IOException e){
           System.out.println("close error");
