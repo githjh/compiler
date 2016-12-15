@@ -5,6 +5,9 @@ int var3;
 int main(int b)
 {
 	int a;
-	printf(5);
-	printf(6);
+	a = 1234;
+	var2 = 1234;
+	a = 1;
+	printf(a);
+	
 }

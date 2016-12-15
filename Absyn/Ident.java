@@ -54,6 +54,11 @@ class Ident extends Absyn
             my_s.setisArray(true);
         }
         my_s.isGlobal = isGlobal;
+        if(isGlobal){
+            my_s.offset = Reg_offset.my_offset.global_offset;
+            System.out.println(my_s.offset);
+        }
+
         SymbolTable.addSymbol(my_s);
         save_symbol = my_s; 
 

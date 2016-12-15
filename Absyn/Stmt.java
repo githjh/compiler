@@ -102,7 +102,8 @@ class AssignStmt extends Stmt
     {
     }
     public void printCODE(){
-        System.out.println("assignstmt");
+        assign.printCODE();
+        //System.out.println("assignstmt");
     }
 }
 
@@ -113,6 +114,7 @@ class Assign extends Absyn
     Expr expr;
     int line;
     int pos;
+    my_Symbol save_symbol;
     public Assign(String n, Expr idx, Expr ex, int _line, int _pos) 
     {
         name = n;
@@ -135,6 +137,7 @@ class Assign extends Absyn
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print, int scope_level){
         my_Symbol my_s  = SymbolTable.find(name);
+        save_symbol = my_s;
         if(my_s == null)
         {
              System.out.println("SYMENTIC ERROR "+line+":"+pos
@@ -170,6 +173,17 @@ class Assign extends Absyn
     }
     public void printCODE(){
         System.out.println("assign");
+        System.out.println(save_symbol.offset);
+        expr.printCODE();
+        if(save_symbol.isGlobal){
+            code_write(String.format("  MOVE REG(%d)@ STACK(%d)",
+                expr.reg_num,save_symbol.offset));
+        }
+        else{
+            code_write(String.format("  MOVE REG(%d)@ STACK(ESP@)",
+                expr.reg_num));
+            code_write("  ADD 1 ESP@ ESP");
+        }
     }
 }
 
@@ -188,8 +202,10 @@ class CallStmt extends Stmt
         call.printAST();
         myPrint.astWriter.write(";\r\n");
     }
-    public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
-        int is_func_comp, int name_print){}
+    public  void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
+        int is_func_comp, int name_print, int scope_level){
+        call.printSYM(n,names, depth, is_func_comp, name_print);
+    }
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth){    }
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth){ }
     public void printCODE(){
@@ -222,18 +238,22 @@ class Call extends Absyn
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print)
     {
-        Function func = SymbolTable.find_func(name);
-        if(func == null)
-        {
-            System.out.println("SYMENTIC ERROR "+line+":"+pos +" function '"
-             +name+"' is not declared");
+        if(name.equals("printf")){
+            args.printSYM(n,names,depth,is_func_comp,name_print);
         }
-         // myPrint.symWriter.write(name);
+        else{
+            Function func = SymbolTable.find_func(name);
+            if(func == null)
+            {
+                System.out.println("SYMENTIC ERROR "+line+":"+pos +" function '"
+                 +name+"' is not declared");
+            }
+            //myPrint.symWriter.write(name);
          // myPrint.symWriter.write("(");
          // if (args != null)
          //     args.printSYM();
          // myPrint.symWriter.write(")");
-
+        }
     }
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth)
     {
@@ -257,7 +277,7 @@ class Call extends Absyn
         if (args != null){
             int i;
             Expr arg_expr;
-            for (i = 0; i < args.al.size(); i++){
+            for (i = args.al.size() -1; i >= 0; i--){
                 arg_expr = args.al.get(i);
                 arg_expr.printCODE();
                 code_write(String.format("  MOVE REG(%d)@ STACK(ESP@)",arg_expr.reg_num));
@@ -272,13 +292,8 @@ class Call extends Absyn
         //code_write("  ADD 1 ESP@ ESP");
         
         code_write("  JMP "+name);
-
         code_write("LAB "+ label_return);
-
         code_write(String.format("  SUB ESP@ %d ESP",2+args.al.size()));
-
-
-
         System.out.println("call");
     }
 }
@@ -666,7 +681,7 @@ class Num extends Expr{
     }
     public void printCODE(){
         reg_num = Reg_offset.my_offset.reg_offset;
-        code_write(String.format("MOVE %s REG(%d)",num, reg_num));
+        code_write(String.format("  MOVE %s REG(%d)",num, reg_num));
         
         Reg_offset.my_offset.add_off();
     }
@@ -676,6 +691,7 @@ class IDExpr extends Expr{
     String name;
     Expr expr;
     boolean isArray;
+    my_Symbol save_symbol;
     public IDExpr(String n, Expr e, boolean isA, int _line, int _pos)
     {
         name = n;
@@ -701,6 +717,8 @@ class IDExpr extends Expr{
     }
     public int getExprType(){
         my_Symbol my_s = SymbolTable.find(name);
+        save_symbol = my_s;
+        //System.out.println("getExprType");
         if(my_s == null)
         {
             System.out.println("SYMENTIC ERROR "+line+":"+pos
@@ -723,6 +741,18 @@ class IDExpr extends Expr{
             return my_s.getType();
         }
     }
+    public void printCODE(){
+        
+        reg_num = Reg_offset.my_offset.reg_offset;
+        if(save_symbol.isGlobal){
+            code_write(String.format("  MOVE STACK(%d)@ REG(%d)",
+                save_symbol.offset, reg_num));
+        }
+       // System.out.println(save_symbol.offset);
+       // System.out.println("test3");
+        Reg_offset.my_offset.add_off();
+    }
+
 }
 class UnOpExpr extends Expr{
     String op;
@@ -834,6 +864,14 @@ class ArgList extends Absyn {
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print)
     {
+        int list_size = al.size();
+        Expr tmp;
+        int ty;
+        for(int i = 0; i< list_size; i ++){
+            tmp = al.get(i);
+            ty = tmp.getExprType();
+            System.out.println("type"+ty);
+        }
 
     }
 }

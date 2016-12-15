@@ -24,6 +24,7 @@ public class Decl extends Absyn {
 		int ty = t.typecheck();
 		int isval = 0;
 		//t.printSYM(start_num);
+		il.isGlobal = isGlobal;
 		start_num = il.printSYM(start_num, ty , isval, scope_level);
 		//myPrint.symWriter.write(";\r\n");
 		return start_num;

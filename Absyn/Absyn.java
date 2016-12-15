@@ -12,7 +12,7 @@ class my_Symbol {
 	boolean isGlobal;
 	int line;
 	int pos;
-	int global_offset;
+	int offset;
 
 	public my_Symbol(Type _ty, String _name, boolean _isParam,
 	 int _scope_level, int _line, int _pos)
