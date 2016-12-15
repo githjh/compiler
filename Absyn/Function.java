@@ -39,7 +39,7 @@ public class Function extends Absyn
         //myPrint.symWriter.write("\r\n");
         //System.out.println("function before");
         if(params != null){
-            start_num = params.printSYM(start_num, 99);
+            start_num = params.printSYM(start_num, 1);
         }
 
         //System.out.println("function after");
@@ -48,6 +48,7 @@ public class Function extends Absyn
   //      myPrint.symWriter.write(")");
         // fuction scope level start from 1
         cs.printSYM(start_num, stmt_names, depth, 1, 0, 0);
+
     }
     public String getname()
     {
@@ -61,7 +62,7 @@ public class Function extends Absyn
         code_write("LAB "+name);
 
         cs.printCODE();
-        System.out.println(Reg_offset.my_offset.reg_offset);
+       // System.out.println(Reg_offset.my_offset.reg_offset);
     }
 }
 

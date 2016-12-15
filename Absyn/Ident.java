@@ -10,6 +10,8 @@ class Ident extends Absyn
     int line;
     int pos;
     Boolean isGlobal;
+    Boolean isParam;
+ 
     my_Symbol save_symbol;
     public Ident(int isA, String n, String array_num, int _line, int _pos) 
     {
@@ -19,6 +21,7 @@ class Ident extends Absyn
         line = _line;
         pos = _pos;
         isGlobal = false;
+        isParam = false;
     }
     public void printAST()
     {
@@ -56,7 +59,20 @@ class Ident extends Absyn
         my_s.isGlobal = isGlobal;
         if(isGlobal){
             my_s.offset = Reg_offset.my_offset.global_offset;
-            System.out.println(my_s.offset);
+            //System.out.println(my_s.offset);
+        }
+        else if(isval == 0){
+            my_s.offset = Reg_offset.my_offset.scope_var_num;
+            //System.out.println(my_s.offset);
+            Reg_offset.my_offset.scope_var_num += 1;
+            
+        }
+        else{
+            isParam = true;
+            my_s.offset = Reg_offset.my_offset.param_num;
+            Reg_offset.my_offset.param_num += 1;
+            my_s.isParam = isParam;
+            //System.out.println(my_s.name);
         }
 
         SymbolTable.addSymbol(my_s);

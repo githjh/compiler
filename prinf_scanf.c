@@ -2,12 +2,19 @@ int var1;
 int var2;
 int var3;
 
-int main(int b)
+int add(int a, int b)
+{
+	return 10;
+}
+
+int main(int b, int c)
 {
 	int a;
-	a = 1234;
-	var2 = 1234;
 	a = 1;
-	printf(a);
-	
+	if (a == 1){
+		printf(5);
+	}
+	else{
+		printf(10)
+	}
 }

@@ -44,6 +44,7 @@ public class FuncList extends Absyn
     public void printCODE(){
         for(Function f: fl){
             f.printCODE();
+            Reg_offset.my_offset.param_num = 0;
         }
     }
 }
