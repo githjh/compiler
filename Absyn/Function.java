@@ -59,6 +59,8 @@ public class Function extends Absyn
     public void printCODE(){
         code_write("//Function : "+name);
         code_write("LAB "+name);
+
+        cs.printCODE();
         System.out.println(Reg_offset.my_offset.reg_offset);
     }
 }

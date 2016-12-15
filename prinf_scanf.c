@@ -5,6 +5,6 @@ int var3;
 int main(int b)
 {
 	int a;
-	scanf(a);
-	printf(a);
+	printf(5);
+	printf(6);
 }

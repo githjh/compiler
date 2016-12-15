@@ -5,10 +5,12 @@ public class Decl extends Absyn {
 
     Type t;
     IdentList il;
+    Boolean isGlobal;
 	public Decl(Type ty, IdentList id)
 	{
 		t = ty;
 		il = id;
+		isGlobal = false;
 	}
 	public void printAST()
 	{

@@ -9,6 +9,7 @@ class Ident extends Absyn
     String ar_num;
     int line;
     int pos;
+    Boolean isGlobal;
     my_Symbol save_symbol;
     public Ident(int isA, String n, String array_num, int _line, int _pos) 
     {
@@ -17,6 +18,7 @@ class Ident extends Absyn
         ar_num = array_num;
         line = _line;
         pos = _pos;
+        isGlobal = false;
     }
     public void printAST()
     {
@@ -51,6 +53,7 @@ class Ident extends Absyn
         if(isArray == 1){
             my_s.setisArray(true);
         }
+        my_s.isGlobal = isGlobal;
         SymbolTable.addSymbol(my_s);
         save_symbol = my_s; 
 

@@ -11,6 +11,7 @@ public class Stmt extends Absyn
     {}
     public  void addSYM(ArrayList<String> names, ArrayList<Integer> depth){};
     public  void removeSYM(ArrayList<String> names, ArrayList<Integer> depth){};
+    public  void printCODE(){};
 }
 
 class StmtList extends Absyn 
@@ -41,6 +42,12 @@ class StmtList extends Absyn
             st.printSYM(n, names, depth, is_func_comp, name_print, scope_level+1);
         }
     }
+    public  void printCODE()
+    {
+        for(Stmt st: sl){
+            st.printCODE();
+        }
+    }
 }
 class Semi extends Stmt
 {
@@ -62,6 +69,9 @@ class Semi extends Stmt
     }
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth)
     {
+    }
+    public void printCODE(){
+        System.out.println("semi");
     }
 
 }
@@ -90,6 +100,9 @@ class AssignStmt extends Stmt
     }
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth)
     {
+    }
+    public void printCODE(){
+        System.out.println("assignstmt");
     }
 }
 
@@ -155,6 +168,9 @@ class Assign extends Absyn
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth)
     {
     }
+    public void printCODE(){
+        System.out.println("assign");
+    }
 }
 
 class CallStmt extends Stmt 
@@ -176,6 +192,9 @@ class CallStmt extends Stmt
         int is_func_comp, int name_print){}
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth){    }
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth){ }
+    public void printCODE(){
+        call.printCODE();
+    }
 }
 
 class Call extends Absyn 
@@ -231,6 +250,37 @@ class Call extends Absyn
         }
         return ty;
     }
+    public void printCODE(){
+        
+        String label_return = "call_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        if (args != null){
+            int i;
+            Expr arg_expr;
+            for (i = 0; i < args.al.size(); i++){
+                arg_expr = args.al.get(i);
+                arg_expr.printCODE();
+                code_write(String.format("  MOVE REG(%d)@ STACK(ESP@)",arg_expr.reg_num));
+                code_write("  ADD 1 ESP@ ESP");
+            }
+        }
+        code_write(String.format("  MOVE %s STACK(ESP@)",label_return));
+        code_write("  ADD 1 ESP@ ESP");
+        code_write("  MOVE EBP@ STACK(ESP@)");
+        code_write("  ADD 1 ESP@ ESP");
+        code_write("  MOVE ESP@ EBP");
+        //code_write("  ADD 1 ESP@ ESP");
+        
+        code_write("  JMP "+name);
+
+        code_write("LAB "+ label_return);
+
+        code_write(String.format("  SUB ESP@ %d ESP",2+args.al.size()));
+
+
+
+        System.out.println("call");
+    }
 }
 
 class RetStmt extends Stmt 
@@ -255,6 +305,9 @@ class RetStmt extends Stmt
         int is_func_comp, int name_print){}
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth){}
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth){}
+    public void printCODE(){
+        System.out.println("RetStmt");
+    }
 }
 
 class WhileStmt extends Stmt 
@@ -315,6 +368,9 @@ class WhileStmt extends Stmt
         names.remove(names.size()-1);
         depth.remove(depth.size()-1);
     }
+    public void printCODE(){
+        System.out.println("WhileStmt");
+    }
 }
 
 class ForStmt extends Stmt 
@@ -366,6 +422,9 @@ class ForStmt extends Stmt
         //myPrint.symWriter.write("remove for call\r\n");
         names.remove(names.size()-1);
         depth.remove(depth.size()-1);
+    }
+    public void printCODE(){
+        System.out.println("for stmt");
     }
 }
 
@@ -438,6 +497,9 @@ class IfStmt extends Stmt
         names.remove(names.size()-1);
         depth.remove(depth.size()-1);
     }
+    public void printCODE(){
+        System.out.println("IfStmt");
+    }
 }
 
 class SwitchStmt extends Stmt 
@@ -500,6 +562,9 @@ class SwitchStmt extends Stmt
         names.remove(names.size()-1);
         depth.remove(depth.size()-1);
     }
+    public void printCODE(){
+        System.out.println("SwitchStmt");
+    }
 }
 
 class CaseList extends Absyn 
@@ -554,6 +619,9 @@ class CaseList extends Absyn
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth)
     {
     }
+    public void printCODE(){
+        System.out.println("caselist");
+    }
 }
 
 class Expr extends Absyn 
@@ -561,6 +629,7 @@ class Expr extends Absyn
     int line;
     int pos;
     int ty;
+    int reg_num;
     public void printAST(){};
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print){};
@@ -576,19 +645,30 @@ class Expr extends Absyn
     public int getPos(){
         return pos;
     }
+    public void printCODE(){
+
+    }
 }
 class Num extends Expr{
     String num;
+    
     public Num(String n, int _ty, int _line, int _pos)
     {
         num = n;
         ty = _ty;
         line = _line;
         pos = _pos;
+        reg_num = 0;
     }
     public void printAST()
     {
         myPrint.astWriter.write(num);
+    }
+    public void printCODE(){
+        reg_num = Reg_offset.my_offset.reg_offset;
+        code_write(String.format("MOVE %s REG(%d)",num, reg_num));
+        
+        Reg_offset.my_offset.add_off();
     }
 
 }
@@ -813,7 +893,9 @@ class CompStmt extends Stmt
         names.remove(names.size()-1);
         depth.remove(depth.size()-1);
     }
-
+    public void printCODE(){
+        stmts.printCODE();
+    }
 }
 
 class EmptyStmt extends Stmt

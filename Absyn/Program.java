@@ -41,8 +41,14 @@ public class Program extends Absyn {
     code_write(String.format("MOVE %d ESP", Reg_offset.my_offset.global_offset+1 ));
     code_write(String.format("MOVE %d EBP", Reg_offset.my_offset.global_offset+1 ));
     
-
     code_write("JMP main");
+    
+    String print_function = ("LAB printf \n"
+                            +"  WRITE STACK(ESP@(-3))@\n"
+                            +"  MOVE  STACK(ESP@(-1))@ EBP\n"
+                            +"  JMP   STACK(ESP@(-2))@\n");
+    code_write(print_function);
+    
     System.out.println(Reg_offset.my_offset.reg_offset);
     Reg_offset.my_offset.add_off();
     if(fl != null){

@@ -5,9 +5,11 @@ import java.util.*;
 public class IdentList extends Absyn 
 {
     ArrayList<Ident> il;
+    Boolean isGlobal;
     public IdentList() 
     {
         il = new ArrayList<Ident>();
+        isGlobal = false;
     }
 
     public IdentList append(Ident id, int comma) 
@@ -34,6 +36,7 @@ public class IdentList extends Absyn
         for(Ident id: il)
         {
             //System.out.println("identlist before");
+            id.isGlobal = isGlobal;
             start_num = id.printSYM(start_num, ty, isval, scope_level);
 
 //            System.out.println("identlist after");
