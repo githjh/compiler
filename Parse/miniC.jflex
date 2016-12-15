@@ -77,6 +77,7 @@ Newline = \r|\n|\r\n
     "case"          {return symbol(sym.CASE);}
     "break"         {return symbol(sym.BREAK);}
     "default"       {return symbol(sym.DEFAULT);}
+    
     {Intnum}        {return symbol(sym.INT_N,yytext());}
     {Floatnum}      {return symbol(sym.FLOAT_N,yytext());}
     {Identifier}    {return symbol(ID,yytext());}

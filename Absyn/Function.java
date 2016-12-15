@@ -56,5 +56,10 @@ public class Function extends Absyn
     public int getType(){
         return t.typecheck();
     }
+    public void printCODE(){
+        code_write("//Function : "+name);
+        code_write("LAB "+name);
+        System.out.println(Reg_offset.my_offset.reg_offset);
+    }
 }
 

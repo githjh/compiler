@@ -9,6 +9,7 @@ class Ident extends Absyn
     String ar_num;
     int line;
     int pos;
+    my_Symbol save_symbol;
     public Ident(int isA, String n, String array_num, int _line, int _pos) 
     {
         name = n;
@@ -51,6 +52,8 @@ class Ident extends Absyn
             my_s.setisArray(true);
         }
         SymbolTable.addSymbol(my_s);
+        save_symbol = my_s; 
+
 
         //System.out.println(name);
         

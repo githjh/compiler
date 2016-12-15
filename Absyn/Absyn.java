@@ -9,8 +9,11 @@ class my_Symbol {
 	String name;
 	boolean isParam;
 	boolean isArray;
+	boolean isGlobal;
 	int line;
 	int pos;
+	int global_offset;
+
 	public my_Symbol(Type _ty, String _name, boolean _isParam,
 	 int _scope_level, int _line, int _pos)
 	{
@@ -19,6 +22,7 @@ class my_Symbol {
 		isParam = _isParam;
 		scope_level = _scope_level;
 		isArray = false;
+		isGlobal = false;
 		line = _line;
 		pos = _pos;
 	}
@@ -45,7 +49,6 @@ class my_Symbol {
 	public int getPos(){
 		return pos;
 	}
-
 }
 
 class SymbolTable{
@@ -135,4 +138,7 @@ public class Absyn  {
         }
         return ret;
     }
+    public void code_write(String code){
+  		myPrint.codeWriter.write(code + "\n");
+	}
 }

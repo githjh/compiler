@@ -60,11 +60,15 @@ public class DeclList extends Absyn{
 		for(Decl d : dl){
 		//	result = String.format("%4d", count);
 		//	myPrint.symWriter.write(result);
+
 			start_num = d.printSYM(start_num, scope_level);
+			if(is_global == 1){
+				Reg_offset.my_offset.global_offset += 1;
+			}
 		//	count ++;
 		}
 		myPrint.symWriter.write("\r\n");
 		return start_num;
 	}
-
+	
 }

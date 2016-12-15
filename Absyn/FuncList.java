@@ -41,5 +41,10 @@ public class FuncList extends Absyn
         //  
         //}
     }
+    public void printCODE(){
+        for(Function f: fl){
+            f.printCODE();
+        }
+    }
 }
 
