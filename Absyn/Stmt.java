@@ -285,7 +285,7 @@ class Call extends Absyn
     }
     public void printCODE(){
         
-        String label_return = "call_"+Reg_offset.my_offset.label_offset;
+        String label_return = "pos_"+Reg_offset.my_offset.label_offset;
         Reg_offset.my_offset.label_offset += 1;
         code_write("//call");
         if (args != null){
@@ -536,7 +536,33 @@ class IfStmt extends Stmt
         depth.remove(depth.size()-1);
     }
     public void printCODE(){
+        String label_next = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        String label_else = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        
+        condition.printCODE();
         System.out.println("IfStmt");
+        if(else_stmt != null){
+            System.out.println("IfStmt1");
+            code_write(String.format("  JMPZ REG(%d)@ %s",
+                condition.reg_num, label_else));
+        }
+        else{
+            System.out.println("IfStmt2");
+            code_write(String.format("  JMPZ REG(%d)@ %s",
+                condition.reg_num, label_next));
+        }
+        then_stmt.printCODE();
+        if(else_stmt != null){
+            System.out.println("IfStmt3");
+            code_write(String.format("  JMP %s", label_next));
+            code_write(String.format("LAB %s",label_else));
+            else_stmt.printCODE();
+        }
+        code_write(String.format("LAB %s",label_next));
+        
+        
     }
 }
 
@@ -865,7 +891,6 @@ class BinOpExpr extends Expr{
     String op;
     Expr e1;
     Expr e2;
-    int reg_num;
     public BinOpExpr(Expr _e1, String _op, Expr _e2, int _line, int _pos){
         e1 = _e1;
         op = _op;
@@ -909,6 +934,17 @@ class BinOpExpr extends Expr{
         if(op.equals("+")){
             code_write(String.format("  ADD REG(%d)@ REG(%d)@ REG(%d)", 
                 e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            Reg_offset.my_offset.add_off();
+        }
+        else if(op.equals("-")){
+            code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)", 
+                e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            Reg_offset.my_offset.add_off();   
+        }
+        else if(op.equals("==")){
+            code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
+                e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
         }
     }
