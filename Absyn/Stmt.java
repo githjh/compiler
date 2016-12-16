@@ -754,6 +754,7 @@ class Expr extends Absyn
         return pos;
     }
     public void printCODE(){
+        System.out.println("EXPR printcode is not overrided");
 
     }
 }
@@ -916,10 +917,19 @@ class UnOpExpr extends Expr{
         int is_func_comp, int name_print)
     {
         System.out.println("UnOpExpr printsym");
-
+        e1.printSYM(n, names, depth, is_func_comp, name_print);
     }
     public int getExprType(){
         return e1.getExprType();
+    }
+    public void printCODE(){
+        e1.printCODE();
+        
+        code_write(String.format("  SUB 0 REG(%d)@ REG(%d)",
+                e1.reg_num,Reg_offset.my_offset.reg_offset));
+        reg_num = Reg_offset.my_offset.reg_offset;
+        Reg_offset.my_offset.add_off();
+    
     }
 }
 class CallExpr extends Expr{
