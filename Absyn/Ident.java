@@ -39,16 +39,26 @@ class Ident extends Absyn
         String count;
         String i_type;
 
-        Type this_type;
+        Type this_type = null;
+         my_Symbol find_s;
         if(ty == 0)
         {
             this_type = new Type(0);
         }
-        else{
+        else if(ty == 1){
             this_type = new Type(1);
         }
+        else if(ty == 100){
+            //this is for switch case
+            find_s = SymbolTable.find(name);
+            save_symbol = find_s;
+            if(find_s == null)
+            System.out.println("SYMENTIC ERROR "+line+":"+pos
+                +" note: "+name + " is not declared");
+            return 1;
+        }
         my_Symbol my_s = new my_Symbol(this_type, name, false, scope_level, line, pos);
-        my_Symbol find_s = SymbolTable.find(name);
+        find_s = SymbolTable.find(name);
         if(find_s != null)
             System.out.println("SYMENTIC ERROR "+line+":"+pos
                 +" note: previous declaration of "+name

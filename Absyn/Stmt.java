@@ -174,21 +174,23 @@ class Assign extends Absyn
     {
     }
     public void printCODE(){
-        System.out.println("assign");
        // System.out.println(save_symbol.offset);
-        expr.printCODE();
-        System.out.println("assign1");
-        if(save_symbol.isGlobal){
-            System.out.println("assign2");
-            code_write(String.format("  MOVE REG(%d)@ STACK(%d)",
-                expr.reg_num,save_symbol.offset));
+        if(expr != null){
+            expr.printCODE();
         }
-        else{
-            System.out.println("assign3");
-            code_write(String.format("  MOVE REG(%d)@ STACK(EBP@(%d))",
-                expr.reg_num, save_symbol.offset));
-            System.out.println("assign4");
-            code_write("  ADD 1 ESP@ ESP");
+        if(save_symbol != null){
+            if(save_symbol.isGlobal){
+                System.out.println("assign2");
+                code_write(String.format("  MOVE REG(%d)@ STACK(%d)",
+                    expr.reg_num,save_symbol.offset));
+            }
+            else{
+                System.out.println("assign3");
+                code_write(String.format("  MOVE REG(%d)@ STACK(EBP@(%d))",
+                    expr.reg_num, save_symbol.offset));
+                System.out.println("assign4");
+                code_write("  ADD 1 ESP@ ESP");
+            }
         }
     }
 }
@@ -644,6 +646,7 @@ class SwitchStmt extends Stmt
         int is_func_comp, int name_print, int scope_level)
     {
         addSYM(names,depth);
+        ident.printSYM(0,100, 0, 0);
         caselist.printSYM(1, names, depth, 1, 1, scope_level);
         if (default_stmt != null)
         {
@@ -670,6 +673,43 @@ class SwitchStmt extends Stmt
     }
     public void printCODE(){
         System.out.println("SwitchStmt");
+        String switch_default = "pos_" +Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        
+        String switch_next = "pos_" +Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        
+        int reg_num = Reg_offset.my_offset.reg_offset;
+
+        my_Symbol save_symbol = ident.save_symbol;
+        if(save_symbol != null){
+            if(save_symbol.isGlobal){
+                code_write(String.format("  MOVE STACK(%d)@ REG(%d)",
+                    save_symbol.offset, reg_num));
+            }
+            //parameters
+            else if(save_symbol.isParam){
+                code_write(String.format("  MOVE STACK(ESP@(%d))@ REG(%d)",
+                    -3 -save_symbol.offset, reg_num));
+            }
+            //local variable
+            else{
+                code_write(String.format("  MOVE STACK(EBP(%d)@)@ REG(%d)",
+                    save_symbol.offset, reg_num));
+            }
+
+            Reg_offset.my_offset.add_off();
+
+            caselist.printCODE(reg_num);
+            code_write(String.format("LAB %s",switch_default));
+            if(default_stmt != null){
+                default_stmt.printCODE();
+            }
+            code_write(String.format("LAB %s",switch_next));
+        }
+        else{
+            System.out.println("SwitchStmt Error");   
+        }
     }
 }
 
@@ -725,8 +765,37 @@ class CaseList extends Absyn
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth)
     {
     }
-    public void printCODE(){
+    public void printCODE(int reg_num){
         System.out.println("caselist");
+        int list_size = il.size();
+        String str;
+        StmtList stmtl;
+        boolean ble;
+        ArrayList<String> label_cases = new ArrayList<String>();
+        int case_reg_num =Reg_offset.my_offset.reg_offset;
+        Reg_offset.my_offset.add_off();
+        String label_break = "pos_"+(Reg_offset.my_offset.label_offset -1);
+        String label_default = "pos_"+(Reg_offset.my_offset.label_offset -2);
+        for(int i = 0; i< list_size; i++){
+            label_cases.add( "pos_"+Reg_offset.my_offset.label_offset);
+            Reg_offset.my_offset.label_offset += 1;
+            str = il.get(i);
+            code_write(String.format("  SUB REG(%d)@ %s REG(%d)",
+                        reg_num,str,case_reg_num));
+            code_write(String.format("  JMPZ REG(%d)@ %s",
+                case_reg_num,label_cases.get(i)));
+
+        }
+        code_write(String.format(" JMP %s",label_default));
+        for(int i = 0; i < list_size; i++){
+            code_write(String.format("LAB %s",label_cases.get(i)));
+            stmtl = sll.get(i);
+            stmtl.printCODE();
+            ble = bl.get(i);
+            if(ble){
+                code_write(String.format("JMP %s",label_break));
+            }
+        }
     }
 }
 
@@ -998,11 +1067,16 @@ class BinOpExpr extends Expr{
     }
 
     public void printCODE(){
-        System.out.println("BinOpExpr1");
         e1.printCODE();
-        System.out.println("BinOpExpr2");
         e2.printCODE();
-        System.out.println("BinOpExpr3");
+
+        String label_true = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        String label_false = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        String label_next = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        
         if(op.equals("+")){
             code_write(String.format("  ADD REG(%d)@ REG(%d)@ REG(%d)", 
                 e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
@@ -1015,13 +1089,37 @@ class BinOpExpr extends Expr{
             reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();   
         }
-        else if(op.equals("==")){
+        else if(op.equals("!=") || op.equals("==")){
+            reg_num = Reg_offset.my_offset.reg_offset;
             code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
                 e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            code_write(String.format("  JMPZ REG(%d)@ %s",
+                    reg_num,label_true));
+            code_write(String.format("LAB %s",label_false));
+            if(op.equals("!=")){
+                code_write(String.format("  MOVE 1 REG(%d)",
+                Reg_offset.my_offset.reg_offset));
+            }
+            else{
+                code_write(String.format("  MOVE 0 REG(%d)",
+                Reg_offset.my_offset.reg_offset));
+            }
+            code_write(String.format("  JMP %s",label_next));
+            code_write(String.format("LAB %s",label_true));
+            if(op.equals("!=")){
+                code_write(String.format("  MOVE 0 REG(%d)",
+                Reg_offset.my_offset.reg_offset));
+            }
+            else{
+                code_write(String.format("  MOVE 1 REG(%d)",
+                Reg_offset.my_offset.reg_offset));   
+            }
             reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
+            code_write(String.format("LAB %s",label_next));     
         }
-        else if(op.equals("<") || op.equals(">") || op.equals("<=") || op.equals(">=")){
+        else if(op.equals("<") || op.equals(">") || 
+                op.equals("<=") || op.equals(">=")){
             if(op.equals("<")){
                 code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
                     e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
@@ -1040,12 +1138,6 @@ class BinOpExpr extends Expr{
             }
             reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
-            String label_true = "pos_"+Reg_offset.my_offset.label_offset;
-            Reg_offset.my_offset.label_offset += 1;
-            String label_false = "pos_"+Reg_offset.my_offset.label_offset;
-            Reg_offset.my_offset.label_offset += 1;
-            String label_next = "pos_"+Reg_offset.my_offset.label_offset;
-            Reg_offset.my_offset.label_offset += 1;
 
             if(op.equals("<") || op.equals(">")){
                 code_write(String.format("  JMPN REG(%d)@ %s",

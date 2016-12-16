@@ -32,8 +32,9 @@ public class FuncList extends Absyn
             myPrint.symWriter.write(f_name);
             myPrint.symWriter.write("\r\n");
             myPrint.symWriter.write("count   Type   name   array       role\r\n");
-            f.printSYM();
             SymbolTable.addFunction(f);
+            f.printSYM();
+            
         }
         //ArrayList<Function> func_table = SymbolTable.getTable().f_table;
         //for(Function func : func_table ){
