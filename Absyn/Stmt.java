@@ -177,13 +177,17 @@ class Assign extends Absyn
         System.out.println("assign");
        // System.out.println(save_symbol.offset);
         expr.printCODE();
+        System.out.println("assign1");
         if(save_symbol.isGlobal){
+            System.out.println("assign2");
             code_write(String.format("  MOVE REG(%d)@ STACK(%d)",
                 expr.reg_num,save_symbol.offset));
         }
         else{
+            System.out.println("assign3");
             code_write(String.format("  MOVE REG(%d)@ STACK(EBP@(%d))",
                 expr.reg_num, save_symbol.offset));
+            System.out.println("assign4");
             code_write("  ADD 1 ESP@ ESP");
         }
     }
@@ -441,6 +445,8 @@ class ForStmt extends Stmt
         int is_func_comp, int name_print, int scope_level)
     {
         addSYM(names,depth);
+        init.printSYM(1, names, depth, 1, 1, scope_level +1);
+        condition.printSYM(1, names, depth, 1,1);
         stmt.printSYM(1, names, depth, 1, 1, scope_level +1 );
         removeSYM(names,depth);
 
@@ -462,7 +468,23 @@ class ForStmt extends Stmt
         depth.remove(depth.size()-1);
     }
     public void printCODE(){
+        String for_start = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        String for_end = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
         System.out.println("for stmt");
+        init.printCODE();
+        code_write(String.format("LAB %s",
+            for_start));
+        condition.printCODE();
+        code_write(String.format("JMPZ REG(%d)@ %s",
+            condition.reg_num, for_end));
+        stmt.printCODE();
+        inc.printCODE();
+        code_write(String.format("JMP %s",
+            for_start));
+        code_write(String.format("LAB %s",
+            for_end));
     }
 }
 
@@ -729,6 +751,7 @@ class Num extends Expr{
         myPrint.astWriter.write(num);
     }
     public void printCODE(){
+        System.out.println("NUM printcode");
         reg_num = Reg_offset.my_offset.reg_offset;
         code_write(String.format("  MOVE %s REG(%d)",num, reg_num));
         
@@ -946,6 +969,9 @@ class BinOpExpr extends Expr{
                 e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
             reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
+        }
+        else if(op.equals("<")){
+            
         }
     }
 }

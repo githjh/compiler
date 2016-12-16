@@ -10,11 +10,7 @@ int add(int a, int b)
 int main(int b, int c)
 {
 	int a;
-	a = 1;
-	if (a == 0){
-		printf(5);
-	}
-	else{
-		printf(10);
+	for(a = 0; a <5; a= a+1){
+		printf(a);
 	}
 }
