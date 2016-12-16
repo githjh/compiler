@@ -411,6 +411,26 @@ class WhileStmt extends Stmt
     }
     public void printCODE(){
         System.out.println("WhileStmt");
+        String while_cond = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        String while_start = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        String while_end = "pos_"+Reg_offset.my_offset.label_offset;
+        Reg_offset.my_offset.label_offset += 1;
+        if(is_do){
+            code_write(String.format("  JMP %s",while_start));
+        }
+        code_write(String.format("LAB %s", while_cond));
+        expr.printCODE();
+        code_write(String.format("  JMPZ REG(%d)@ %s",
+            expr.reg_num, while_end));
+        code_write(String.format("LAB %s",
+            while_start));
+        stmt.printCODE();
+        code_write(String.format("  JMP %s",
+            while_cond));
+        code_write(String.format("LAB %s",
+            while_end));
     }
 }
 
