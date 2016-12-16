@@ -250,7 +250,6 @@ class Call extends Absyn
             for(int i =0; i < args.al.size(); i ++){
                 //temp = args.al.get(i);
                 //arg_ty.getType();
-                
             }
             args.printSYM(n,names,depth,is_func_comp,name_print);
         }
@@ -447,6 +446,7 @@ class ForStmt extends Stmt
         addSYM(names,depth);
         init.printSYM(1, names, depth, 1, 1, scope_level +1);
         condition.printSYM(1, names, depth, 1,1);
+        inc.printSYM(1, names, depth, 1,1, scope_level +1);
         stmt.printSYM(1, names, depth, 1, 1, scope_level +1 );
         removeSYM(names,depth);
 
@@ -718,7 +718,9 @@ class Expr extends Absyn
     int reg_num;
     public void printAST(){};
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
-        int is_func_comp, int name_print){};
+        int is_func_comp, int name_print){
+        System.out.println("not overrided EXPR");
+    };
     public int getExprType(){
     //    System.out.println("getExprType");
     //    System.out.println(pos);
@@ -749,6 +751,12 @@ class Num extends Expr{
     public void printAST()
     {
         myPrint.astWriter.write(num);
+    }
+    public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
+    int is_func_comp, int name_print)
+    {
+        System.out.println("NUM expr  sym");
+
     }
     public void printCODE(){
         System.out.println("NUM printcode");
@@ -787,7 +795,7 @@ class IDExpr extends Expr{
     {
         my_Symbol my_s = SymbolTable.find(name);
         save_symbol = my_s;
-        //System.out.println("getExprType");
+        //System.out.println("printsysm expr" + name);
         if(my_s == null)
         {
             System.out.println("SYMENTIC ERROR "+line+":"+pos
@@ -810,16 +818,20 @@ class IDExpr extends Expr{
 
     }
     public int getExprType(){
+        
         my_Symbol my_s = SymbolTable.find(name);
         save_symbol = my_s;
         //System.out.println("getExprType");
         if(my_s == null)
         {
+            /*
             System.out.println("SYMENTIC ERROR "+line+":"+pos
                 +" note: "+ name + " is not declared");
+            */
             return -1;
         }
         else{
+            /*
             boolean my_s_isArr = my_s.getisArray();
 
             if(isArray == true && my_s_isArr == false)
@@ -832,13 +844,18 @@ class IDExpr extends Expr{
                 System.out.println("SYMENTIC ERROR "+line+":"+pos
                 +" note: "+ name + " is an array");
             }
+            */
             return my_s.getType();
         }
+        
     }
     public void printCODE(){
         
         reg_num = Reg_offset.my_offset.reg_offset;
-        //System.out.println("idexpr1");
+        System.out.println("idexpr1");
+        if(save_symbol == null){
+            System.out.println("NULL");
+        }
         if(save_symbol.isGlobal){
             code_write(String.format("  MOVE STACK(%d)@ REG(%d)",
                 save_symbol.offset, reg_num));
@@ -878,6 +895,7 @@ class UnOpExpr extends Expr{
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print)
     {
+        System.out.println("UnOpExpr printsym");
 
     }
     public int getExprType(){
@@ -948,6 +966,7 @@ class BinOpExpr extends Expr{
                     +" expr type miss match");
         }
     }
+
     public void printCODE(){
         System.out.println("BinOpExpr1");
         e1.printCODE();
@@ -957,11 +976,13 @@ class BinOpExpr extends Expr{
         if(op.equals("+")){
             code_write(String.format("  ADD REG(%d)@ REG(%d)@ REG(%d)", 
                 e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
         }
         else if(op.equals("-")){
             code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)", 
                 e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();   
         }
         else if(op.equals("==")){
@@ -970,8 +991,72 @@ class BinOpExpr extends Expr{
             reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
         }
-        else if(op.equals("<")){
-            
+        else if(op.equals("<") || op.equals(">") || op.equals("<=") || op.equals(">=")){
+            if(op.equals("<")){
+                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
+                    e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            }
+            else if(op.equals(">")){
+                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
+                    e2.reg_num,e1.reg_num, Reg_offset.my_offset.reg_offset));   
+            }
+            else if(op.equals("<=")){
+                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
+                    e2.reg_num,e1.reg_num, Reg_offset.my_offset.reg_offset));   
+            }
+            else if(op.equals(">=")){
+                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
+                    e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            }
+            reg_num = Reg_offset.my_offset.reg_offset;
+            Reg_offset.my_offset.add_off();
+            String label_true = "pos_"+Reg_offset.my_offset.label_offset;
+            Reg_offset.my_offset.label_offset += 1;
+            String label_false = "pos_"+Reg_offset.my_offset.label_offset;
+            Reg_offset.my_offset.label_offset += 1;
+            String label_next = "pos_"+Reg_offset.my_offset.label_offset;
+            Reg_offset.my_offset.label_offset += 1;
+
+            if(op.equals("<") || op.equals(">")){
+                code_write(String.format("  JMPN REG(%d)@ %s",
+                    reg_num,label_true));
+            }
+            else if(op.equals("<=") || op.equals(">=")){
+                code_write(String.format("  JMPN REG(%d)@ %s",
+                    reg_num,label_false));   
+            }
+            if(op.equals("<") || op.equals(">")){
+                code_write(String.format("LAB %s",label_false));
+                code_write(String.format("  MOVE 0 REG(%d)",
+                    Reg_offset.my_offset.reg_offset));
+                reg_num = Reg_offset.my_offset.reg_offset;
+
+                code_write(String.format("  JMP %s",label_next));
+
+                code_write(String.format("LAB %s",label_true));
+                code_write(String.format("  MOVE 1 REG(%d)",
+                    Reg_offset.my_offset.reg_offset));
+                reg_num = Reg_offset.my_offset.reg_offset;
+                Reg_offset.my_offset.add_off();
+
+                code_write(String.format("LAB %s",label_next));
+            }
+            else{
+                code_write(String.format("LAB %s",label_true));
+                code_write(String.format("  MOVE 1 REG(%d)",
+                    Reg_offset.my_offset.reg_offset));
+                reg_num = Reg_offset.my_offset.reg_offset;
+
+                code_write(String.format("  JMP %s",label_next));
+
+                code_write(String.format("LAB %s",label_false));
+                code_write(String.format("  MOVE 0 REG(%d)",
+                    Reg_offset.my_offset.reg_offset));
+                reg_num = Reg_offset.my_offset.reg_offset;
+                Reg_offset.my_offset.add_off();
+
+                code_write(String.format("LAB %s",label_next));
+            }
         }
     }
 }
