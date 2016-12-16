@@ -27,26 +27,26 @@ public class Program extends Absyn {
     }
     // code writer
 
-    code_write("AREA ESP");
-    code_write("AREA EBP");
-    code_write("AREA STACK");
+    code_write("AREA SP");
+    code_write("AREA FP");
+    code_write("AREA MEM");
 
-    code_write("AREA REG");
+    code_write("AREA VR");
     code_write("LAB START");
 
     
 
 
     //System.out.println(Reg_offset.my_offset.global_offset);
-    code_write(String.format("MOVE %d ESP", Reg_offset.my_offset.global_offset));
-    code_write(String.format("MOVE %d EBP", Reg_offset.my_offset.global_offset));
+    code_write(String.format("MOVE %d SP", Reg_offset.my_offset.global_offset));
+    code_write(String.format("MOVE %d FP", Reg_offset.my_offset.global_offset));
     
     code_write("JMP main");
     
     String print_function = ("LAB printf \n"
-                            +"  WRITE STACK(ESP@(-3))@\n"
-                            +"  MOVE  STACK(ESP@(-1))@ EBP\n"
-                            +"  JMP   STACK(ESP@(-2))@\n");
+                            +"  WRITE MEM(SP@(-3))@\n"
+                            +"  MOVE  MEM(SP@(-1))@ FP\n"
+                            +"  JMP   MEM(SP@(-2))@\n");
     code_write(print_function);
     
     //System.out.println(Reg_offset.my_offset.reg_offset);
@@ -55,7 +55,7 @@ public class Program extends Absyn {
       fl.printCODE();
     }
 
-    
+    code_write("LAB EXIT");
     code_write("LAB END");
 
 

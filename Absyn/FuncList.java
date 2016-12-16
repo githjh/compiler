@@ -35,6 +35,8 @@ public class FuncList extends Absyn
             SymbolTable.addFunction(f);
             f.printSYM();
             
+            Reg_offset.my_offset.param_num = 0;
+            
         }
         //ArrayList<Function> func_table = SymbolTable.getTable().f_table;
         //for(Function func : func_table ){
@@ -45,7 +47,6 @@ public class FuncList extends Absyn
     public void printCODE(){
         for(Function f: fl){
             f.printCODE();
-            Reg_offset.my_offset.param_num = 0;
         }
     }
 }

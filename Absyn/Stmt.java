@@ -181,15 +181,15 @@ class Assign extends Absyn
         if(save_symbol != null){
             if(save_symbol.isGlobal){
                 System.out.println("assign2");
-                code_write(String.format("  MOVE REG(%d)@ STACK(%d)",
+                code_write(String.format("  MOVE VR(%d)@ MEM(%d)",
                     expr.reg_num,save_symbol.offset));
             }
             else{
                 System.out.println("assign3");
-                code_write(String.format("  MOVE REG(%d)@ STACK(EBP@(%d))",
+                code_write(String.format("  MOVE VR(%d)@ MEM(FP@(%d))",
                     expr.reg_num, save_symbol.offset));
                 System.out.println("assign4");
-                code_write("  ADD 1 ESP@ ESP");
+                code_write("  ADD 1 SP@ SP");
             }
         }
     }
@@ -299,20 +299,20 @@ class Call extends Absyn
             for (i = args.al.size() -1; i >= 0; i--){
                 arg_expr = args.al.get(i);
                 arg_expr.printCODE();
-                code_write(String.format("  MOVE REG(%d)@ STACK(ESP@)",arg_expr.reg_num));
-                code_write("  ADD 1 ESP@ ESP");
+                code_write(String.format("  MOVE VR(%d)@ MEM(SP@)",arg_expr.reg_num));
+                code_write("  ADD 1 SP@ SP");
             }
         }
-        code_write(String.format("  MOVE %s STACK(ESP@)",label_return));
-        code_write("  ADD 1 ESP@ ESP");
-        code_write("  MOVE EBP@ STACK(ESP@)");
-        code_write("  ADD 1 ESP@ ESP");
-        code_write("  MOVE ESP@ EBP");
-        //code_write("  ADD 1 ESP@ ESP");
+        code_write(String.format("  MOVE %s MEM(SP@)",label_return));
+        code_write("  ADD 1 SP@ SP");
+        code_write("  MOVE FP@ MEM(SP@)");
+        code_write("  ADD 1 SP@ SP");
+        code_write("  MOVE SP@ FP");
+        //code_write("  ADD 1 SP@ SP");
         
         code_write("  JMP "+name);
         code_write("LAB "+ label_return);
-        code_write(String.format("  SUB ESP@ %d ESP",2+args.al.size()));
+        code_write(String.format("  SUB SP@ %d SP",2+args.al.size()));
         System.out.println("call");
     }
 }
@@ -345,11 +345,11 @@ class RetStmt extends Stmt
     public void printCODE(){
         System.out.println("RetStmt");
         expr.printCODE();
-        code_write(String.format("  MOVE REG(%d)@ REG(0)", 
+        code_write(String.format("  MOVE VR(%d)@ VR(0)", 
                 Reg_offset.my_offset.reg_offset -1));
         //Reg_offset.my_offset.add_off();
-        code_write("  MOVE STACK(ESP@(-1))@ EBP");
-        code_write("  JMP  STACK(ESP@(-2))@");
+        code_write("  MOVE MEM(SP@(-1))@ FP");
+        code_write("  JMP  MEM(SP@(-2))@");
     }
 }
 
@@ -424,7 +424,7 @@ class WhileStmt extends Stmt
         }
         code_write(String.format("LAB %s", while_cond));
         expr.printCODE();
-        code_write(String.format("  JMPZ REG(%d)@ %s",
+        code_write(String.format("  JMPZ VR(%d)@ %s",
             expr.reg_num, while_end));
         code_write(String.format("LAB %s",
             while_start));
@@ -499,7 +499,7 @@ class ForStmt extends Stmt
         code_write(String.format("LAB %s",
             for_start));
         condition.printCODE();
-        code_write(String.format("JMPZ REG(%d)@ %s",
+        code_write(String.format("JMPZ VR(%d)@ %s",
             condition.reg_num, for_end));
         stmt.printCODE();
         inc.printCODE();
@@ -589,12 +589,12 @@ class IfStmt extends Stmt
         System.out.println("IfStmt");
         if(else_stmt != null){
             System.out.println("IfStmt1");
-            code_write(String.format("  JMPZ REG(%d)@ %s",
+            code_write(String.format("  JMPZ VR(%d)@ %s",
                 condition.reg_num, label_else));
         }
         else{
             System.out.println("IfStmt2");
-            code_write(String.format("  JMPZ REG(%d)@ %s",
+            code_write(String.format("  JMPZ VR(%d)@ %s",
                 condition.reg_num, label_next));
         }
         then_stmt.printCODE();
@@ -684,17 +684,17 @@ class SwitchStmt extends Stmt
         my_Symbol save_symbol = ident.save_symbol;
         if(save_symbol != null){
             if(save_symbol.isGlobal){
-                code_write(String.format("  MOVE STACK(%d)@ REG(%d)",
+                code_write(String.format("  MOVE MEM(%d)@ VR(%d)",
                     save_symbol.offset, reg_num));
             }
             //parameters
             else if(save_symbol.isParam){
-                code_write(String.format("  MOVE STACK(ESP@(%d))@ REG(%d)",
+                code_write(String.format("  MOVE MEM(FP@(%d))@ VR(%d)",
                     -3 -save_symbol.offset, reg_num));
             }
             //local variable
             else{
-                code_write(String.format("  MOVE STACK(EBP(%d)@)@ REG(%d)",
+                code_write(String.format("  MOVE MEM(FP(%d)@)@ VR(%d)",
                     save_symbol.offset, reg_num));
             }
 
@@ -780,9 +780,9 @@ class CaseList extends Absyn
             label_cases.add( "pos_"+Reg_offset.my_offset.label_offset);
             Reg_offset.my_offset.label_offset += 1;
             str = il.get(i);
-            code_write(String.format("  SUB REG(%d)@ %s REG(%d)",
+            code_write(String.format("  SUB VR(%d)@ %s VR(%d)",
                         reg_num,str,case_reg_num));
-            code_write(String.format("  JMPZ REG(%d)@ %s",
+            code_write(String.format("  JMPZ VR(%d)@ %s",
                 case_reg_num,label_cases.get(i)));
 
         }
@@ -851,7 +851,7 @@ class Num extends Expr{
     public void printCODE(){
         System.out.println("NUM printcode");
         reg_num = Reg_offset.my_offset.reg_offset;
-        code_write(String.format("  MOVE %s REG(%d)",num, reg_num));
+        code_write(String.format("  MOVE %s VR(%d)",num, reg_num));
         
         Reg_offset.my_offset.add_off();
     }
@@ -947,18 +947,18 @@ class IDExpr extends Expr{
             System.out.println("NULL");
         }
         if(save_symbol.isGlobal){
-            code_write(String.format("  MOVE STACK(%d)@ REG(%d)",
+            code_write(String.format("  MOVE MEM(%d)@ VR(%d)",
                 save_symbol.offset, reg_num));
         }
         //parameters
         else if(save_symbol.isParam){
-            code_write(String.format("  MOVE STACK(ESP@(%d))@ REG(%d)",
+            code_write(String.format("  MOVE MEM(FP@(%d))@ VR(%d)",
                 -3 -save_symbol.offset, reg_num));
         }
         //local variable
         else{
             System.out.println("idexpr2");
-            code_write(String.format("  MOVE STACK(EBP(%d)@)@ REG(%d)",
+            code_write(String.format("  MOVE MEM(FP(%d)@)@ VR(%d)",
                 save_symbol.offset, reg_num));
         }
         //System.out.println("idexpr3");
@@ -994,7 +994,7 @@ class UnOpExpr extends Expr{
     public void printCODE(){
         e1.printCODE();
         
-        code_write(String.format("  SUB 0 REG(%d)@ REG(%d)",
+        code_write(String.format("  SUB 0 VR(%d)@ VR(%d)",
                 e1.reg_num,Reg_offset.my_offset.reg_offset));
         reg_num = Reg_offset.my_offset.reg_offset;
         Reg_offset.my_offset.add_off();
@@ -1068,7 +1068,11 @@ class BinOpExpr extends Expr{
 
     public void printCODE(){
         e1.printCODE();
+        code_write(String.format("  MOVE VR(%d)@ MEM(SP@)",e1.reg_num));
+        code_write(String.format("  ADD 1 SP@ SP"));
         e2.printCODE();
+        code_write(String.format("  MOVE VR(%d)@ MEM(SP@)",e2.reg_num));
+        code_write(String.format("  ADD 1 SP@ SP"));
 
         String label_true = "pos_"+Reg_offset.my_offset.label_offset;
         Reg_offset.my_offset.label_offset += 1;
@@ -1078,40 +1082,40 @@ class BinOpExpr extends Expr{
         Reg_offset.my_offset.label_offset += 1;
         
         if(op.equals("+")){
-            code_write(String.format("  ADD REG(%d)@ REG(%d)@ REG(%d)", 
-                e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            code_write(String.format("  ADD MEM(SP@(-2))@ MEM(SP@(-1))@ VR(%d)", 
+                 Reg_offset.my_offset.reg_offset));
             reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
         }
         else if(op.equals("-")){
-            code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)", 
-                e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+            code_write(String.format("  SUB MEM(SP@(-2))@ MEM(SP@(-1))@ VR(%d)", 
+                 Reg_offset.my_offset.reg_offset));
             reg_num = Reg_offset.my_offset.reg_offset;
-            Reg_offset.my_offset.add_off();   
+            Reg_offset.my_offset.add_off(); 
         }
         else if(op.equals("!=") || op.equals("==")){
             reg_num = Reg_offset.my_offset.reg_offset;
-            code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
-                e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
-            code_write(String.format("  JMPZ REG(%d)@ %s",
+            code_write(String.format("  SUB MEM(SP@(-2))@ MEM(SP@(-1))@ VR(%d)", 
+                 Reg_offset.my_offset.reg_offset));
+            code_write(String.format("  JMPZ VR(%d)@ %s",
                     reg_num,label_true));
             code_write(String.format("LAB %s",label_false));
             if(op.equals("!=")){
-                code_write(String.format("  MOVE 1 REG(%d)",
+                code_write(String.format("  MOVE 1 VR(%d)",
                 Reg_offset.my_offset.reg_offset));
             }
             else{
-                code_write(String.format("  MOVE 0 REG(%d)",
+                code_write(String.format("  MOVE 0 VR(%d)",
                 Reg_offset.my_offset.reg_offset));
             }
             code_write(String.format("  JMP %s",label_next));
             code_write(String.format("LAB %s",label_true));
             if(op.equals("!=")){
-                code_write(String.format("  MOVE 0 REG(%d)",
+                code_write(String.format("  MOVE 0 VR(%d)",
                 Reg_offset.my_offset.reg_offset));
             }
             else{
-                code_write(String.format("  MOVE 1 REG(%d)",
+                code_write(String.format("  MOVE 1 VR(%d)",
                 Reg_offset.my_offset.reg_offset));   
             }
             reg_num = Reg_offset.my_offset.reg_offset;
@@ -1121,42 +1125,42 @@ class BinOpExpr extends Expr{
         else if(op.equals("<") || op.equals(">") || 
                 op.equals("<=") || op.equals(">=")){
             if(op.equals("<")){
-                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
-                    e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+                code_write(String.format("  SUB MEM(SP@(-2))@ MEM(SP@(-1))@ VR(%d)", 
+                 Reg_offset.my_offset.reg_offset));
             }
             else if(op.equals(">")){
-                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
-                    e2.reg_num,e1.reg_num, Reg_offset.my_offset.reg_offset));   
+                code_write(String.format("  SUB MEM(SP@(-1))@ MEM(SP@(-2))@ VR(%d)", 
+                 Reg_offset.my_offset.reg_offset));
             }
             else if(op.equals("<=")){
-                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
-                    e2.reg_num,e1.reg_num, Reg_offset.my_offset.reg_offset));   
+                code_write(String.format("  SUB MEM(SP@(-1))@ MEM(SP@(-2))@ VR(%d)", 
+                 Reg_offset.my_offset.reg_offset));
             }
             else if(op.equals(">=")){
-                code_write(String.format("  SUB REG(%d)@ REG(%d)@ REG(%d)",
-                    e1.reg_num,e2.reg_num, Reg_offset.my_offset.reg_offset));
+                code_write(String.format("  SUB MEM(SP@(-2))@ MEM(SP@(-1))@ VR(%d)", 
+                 Reg_offset.my_offset.reg_offset));
             }
             reg_num = Reg_offset.my_offset.reg_offset;
             Reg_offset.my_offset.add_off();
 
             if(op.equals("<") || op.equals(">")){
-                code_write(String.format("  JMPN REG(%d)@ %s",
+                code_write(String.format("  JMPN VR(%d)@ %s",
                     reg_num,label_true));
             }
             else if(op.equals("<=") || op.equals(">=")){
-                code_write(String.format("  JMPN REG(%d)@ %s",
+                code_write(String.format("  JMPN VR(%d)@ %s",
                     reg_num,label_false));   
             }
             if(op.equals("<") || op.equals(">")){
                 code_write(String.format("LAB %s",label_false));
-                code_write(String.format("  MOVE 0 REG(%d)",
+                code_write(String.format("  MOVE 0 VR(%d)",
                     Reg_offset.my_offset.reg_offset));
                 reg_num = Reg_offset.my_offset.reg_offset;
 
                 code_write(String.format("  JMP %s",label_next));
 
                 code_write(String.format("LAB %s",label_true));
-                code_write(String.format("  MOVE 1 REG(%d)",
+                code_write(String.format("  MOVE 1 VR(%d)",
                     Reg_offset.my_offset.reg_offset));
                 reg_num = Reg_offset.my_offset.reg_offset;
                 Reg_offset.my_offset.add_off();
@@ -1165,14 +1169,14 @@ class BinOpExpr extends Expr{
             }
             else{
                 code_write(String.format("LAB %s",label_true));
-                code_write(String.format("  MOVE 1 REG(%d)",
+                code_write(String.format("  MOVE 1 VR(%d)",
                     Reg_offset.my_offset.reg_offset));
                 reg_num = Reg_offset.my_offset.reg_offset;
 
                 code_write(String.format("  JMP %s",label_next));
 
                 code_write(String.format("LAB %s",label_false));
-                code_write(String.format("  MOVE 0 REG(%d)",
+                code_write(String.format("  MOVE 0 VR(%d)",
                     Reg_offset.my_offset.reg_offset));
                 reg_num = Reg_offset.my_offset.reg_offset;
                 Reg_offset.my_offset.add_off();
@@ -1180,6 +1184,8 @@ class BinOpExpr extends Expr{
                 code_write(String.format("LAB %s",label_next));
             }
         }
+
+        code_write(String.format("  SUB SP@ 2 SP"));
     }
 }
 
