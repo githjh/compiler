@@ -19,5 +19,5 @@ int main(int b)
 {
 	int a;
 	a = 10;
-	printf(fib(a));
+	printf(fib(a)+fact(a));
 }
