@@ -261,7 +261,7 @@ class CallStmt extends Stmt
     }
     public  void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print, int scope_level){
-        System.out.println("callstmt");
+       // System.out.println("callstmt");
         call.printSYM(n,names, depth, is_func_comp, name_print);
     }
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth){    }
@@ -322,7 +322,7 @@ class Call extends Absyn
                  +name+"' is not declared");
             }
             else{
-                System.out.println("call analysis");
+             //   System.out.println("call analysis");
                 args.save_function = func;
                 args.printSYM(n, names, depth, is_func_comp, name_print);
             }
@@ -345,7 +345,7 @@ class Call extends Absyn
         }
         else{
             ty = func.getType();
-            System.out.println(" function : "+ name + " type : "+ ty);
+            //System.out.println(" function : "+ name + " type : "+ ty);
         }
         return ty;
     }
@@ -357,7 +357,7 @@ class Call extends Absyn
         //call by reference
         if (name.equals("scanf")){
             arg_expr = args.al.get(0);
-            System.out.println(arg_expr.name + " !!!!!!!!!");
+            //System.out.println(arg_expr.name + " !!!!!!!!!");
             arg_expr.get_MEM_addr();
             code_write(String.format(" MOVE VR(%d)@ MEM(SP@)", arg_expr.reg_num));
             code_write("  ADD 1 SP@ SP");
@@ -386,7 +386,7 @@ class Call extends Absyn
         code_write("LAB "+ label_return);
         code_write(String.format("  SUB SP@ %d SP",2+args.al.size()));
 
-        System.out.println("call type_convert");
+       // System.out.println("call type_convert");
     }
 }
 
@@ -415,17 +415,17 @@ class RetStmt extends Stmt
         expr.printSYM(n, names, depth, is_func_comp, name_print);
         
         save_function = SymbolTable.find_last_func();
-        System.out.println("RetStmt save_function + " + save_function.name);
+        //System.out.println("RetStmt save_function + " + save_function.name);
     }
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth){}
     public void removeSYM(ArrayList<String> names, ArrayList<Integer> depth){}
     public void printCODE(){
-        System.out.println("RetStmt");
+        //System.out.println("RetStmt");
         expr.printCODE();
         int expr_type = expr.getExprType();
         int func_type = save_function.t.typecheck();
         int type_convert = 0;
-        System.out.println("\nfunction :  expr_type " + expr_type + " function type " + func_type);
+        //System.out.println("\nfunction :  expr_type " + expr_type + " function type " + func_type);
         if(expr_type == 1 && func_type == 0){
             type_convert = 1;
         }
@@ -434,6 +434,7 @@ class RetStmt extends Stmt
         }
 
         if(type_convert == 1){
+            //System.out.println(" F2I");
             code_write(String.format("  F2I VR(%d)@ VR(%d)",
                             expr.reg_num, Reg_offset.my_offset.reg_offset));
             expr.reg_num = Reg_offset.my_offset.reg_offset;
@@ -514,7 +515,7 @@ class WhileStmt extends Stmt
         depth.remove(depth.size()-1);
     }
     public void printCODE(){
-        System.out.println("WhileStmt");
+        //System.out.println("WhileStmt");
         String while_cond = "pos_"+Reg_offset.my_offset.label_offset;
         Reg_offset.my_offset.label_offset += 1;
         String while_start = "pos_"+Reg_offset.my_offset.label_offset;
@@ -596,7 +597,7 @@ class ForStmt extends Stmt
         Reg_offset.my_offset.label_offset += 1;
         String for_end = "pos_"+Reg_offset.my_offset.label_offset;
         Reg_offset.my_offset.label_offset += 1;
-        System.out.println("for stmt");
+        //System.out.println("for stmt");
         init.printCODE();
         code_write(String.format("LAB %s",
             for_start));
@@ -688,20 +689,20 @@ class IfStmt extends Stmt
         Reg_offset.my_offset.label_offset += 1;
         
         condition.printCODE();
-        System.out.println("IfStmt");
+        //System.out.println("IfStmt");
         if(else_stmt != null){
-            System.out.println("IfStmt1");
+            //System.out.println("IfStmt1");
             code_write(String.format("  JMPZ VR(%d)@ %s",
                 condition.reg_num, label_else));
         }
         else{
-            System.out.println("IfStmt2");
+            //System.out.println("IfStmt2");
             code_write(String.format("  JMPZ VR(%d)@ %s",
                 condition.reg_num, label_next));
         }
         then_stmt.printCODE();
         if(else_stmt != null){
-            System.out.println("IfStmt3");
+            //System.out.println("IfStmt3");
             code_write(String.format("  JMP %s", label_next));
             code_write(String.format("LAB %s",label_else));
             else_stmt.printCODE();
@@ -774,7 +775,7 @@ class SwitchStmt extends Stmt
         depth.remove(depth.size()-1);
     }
     public void printCODE(){
-        System.out.println("SwitchStmt");
+        //System.out.println("SwitchStmt");
         String switch_default = "pos_" +Reg_offset.my_offset.label_offset;
         Reg_offset.my_offset.label_offset += 1;
         
@@ -868,7 +869,7 @@ class CaseList extends Absyn
     {
     }
     public void printCODE(int reg_num){
-        System.out.println("caselist");
+        //System.out.println("caselist");
         int list_size = il.size();
         String str;
         StmtList stmtl;
@@ -918,7 +919,7 @@ class Expr extends Absyn
         System.out.println("not overrided EXPR");
     };
     public int getExprType(){
-        System.out.println("getExprType : " + ty);
+        //System.out.println("getExprType : " + ty);
     //    System.out.println(pos);
         return ty;
     };
@@ -955,11 +956,11 @@ class Num extends Expr{
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
     int is_func_comp, int name_print)
     {
-        System.out.println("NUM expr  sym");
+        //System.out.println("NUM expr  sym");
 
     }
     public void printCODE(){
-        System.out.println("NUM printcode");
+        //System.out.println("NUM printcode");
         reg_num = Reg_offset.my_offset.reg_offset;
         code_write(String.format("  MOVE %s VR(%d)",num, reg_num));
         Reg_offset.my_offset.add_off();
@@ -1013,7 +1014,7 @@ class IDExpr extends Expr{
         
         my_Symbol my_s = SymbolTable.find(name);
         save_symbol = my_s;
-        System.out.println("printsysm expr : " + name);
+        //System.out.println("printsysm expr : " + name);
         if(my_s == null)
         {
             System.out.println("SYMENTIC ERROR "+line+":"+pos
@@ -1047,7 +1048,7 @@ class IDExpr extends Expr{
         }
         else{
 
-            System.out.println("my_s.gettype(): "+my_s.getType());
+            //System.out.println("my_s.gettype(): "+my_s.getType());
             return my_s.getType();
         }
         
@@ -1055,7 +1056,7 @@ class IDExpr extends Expr{
     public void printCODE(){
         
         
-        System.out.println("idexpr1 : "+ save_symbol.name);
+        //System.out.println("idexpr1 : "+ save_symbol.name);
         int arr_offset = 0;
         
         if(save_symbol == null){
@@ -1185,7 +1186,7 @@ class UnOpExpr extends Expr{
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print)
     {
-        System.out.println("UnOpExpr printsym");
+        //System.out.println("UnOpExpr printsym");
         e1.printSYM(n, names, depth, is_func_comp, name_print);
     }
     public int getExprType(){
@@ -1216,7 +1217,7 @@ class CallExpr extends Expr{
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print)
     {
-        System.out.println("callexpr");
+        //System.out.println("callexpr");
         cl.printSYM(n,names, depth, is_func_comp, name_print);
     }
     public int getExprType(){
@@ -1224,7 +1225,7 @@ class CallExpr extends Expr{
     }
     public void printCODE(){
         cl.printCODE();
-        System.out.println("call type_convert : " + type_convert);
+        //System.out.println("call type_convert : " + type_convert);
         //F->I
         if(type_convert == 1){
             code_write(String.format("  F2I VR(0)@ VR(%d)",
@@ -1268,7 +1269,7 @@ class BinOpExpr extends Expr{
         e2.printSYM(n, names, depth, is_func_comp, name_print);
         int e1_type = e1.getExprType();
         int e2_type = e2.getExprType();
-        System.out.println(e1_type + " "+ op + " " +e2_type);
+        //System.out.println(e1_type + " "+ op + " " +e2_type);
         if(e1_type == 0 && e2_type == 0)
         {
             ty = 0;
@@ -1287,7 +1288,7 @@ class BinOpExpr extends Expr{
     public int getExprType(){
         int e1_type = e1.getExprType();
         int e2_type = e2.getExprType();
-        System.out.println(e1_type + " "+ op + " " +e2_type);
+       // System.out.println(e1_type + " "+ op + " " +e2_type);
         if(e1_type == 0 && e2_type == 0)
         {
             ty = 0;
@@ -1487,7 +1488,7 @@ class ArgList extends Absyn {
         int list_size = al.size();
         Expr tmp;
         int ty;
-        System.out.println("arglist");
+        //System.out.println("arglist");
         ParamList temp_list;
         ArrayList<Type> tl = null;
         int param_type;
@@ -1510,7 +1511,7 @@ class ArgList extends Absyn {
                 else if(ty == 0 && param_type == 1){
                     tmp.type_convert = 2;
                 }
-                System.out.println("input: "+ty + " ori : " + param_type);
+                //System.out.println("input: "+ty + " ori : " + param_type);
             }
          //   System.out.println("type"+ty);
         }
