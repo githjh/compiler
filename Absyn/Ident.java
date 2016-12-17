@@ -69,12 +69,25 @@ class Ident extends Absyn
         my_s.isGlobal = isGlobal;
         if(isGlobal){
             my_s.offset = Reg_offset.my_offset.global_offset;
+            if(isArray == 1){
+                System.out.println("reg global_offset : " + my_s.offset);
+                Reg_offset.my_offset.global_offset += Integer.parseInt(ar_num);
+            }
+            else{
+                Reg_offset.my_offset.global_offset += 1;   
+            }
             //System.out.println(my_s.offset);
         }
+        //local variable 
         else if(isval == 0){
             my_s.offset = Reg_offset.my_offset.scope_var_num;
             //System.out.println(my_s.offset);
-            Reg_offset.my_offset.scope_var_num += 1;
+            if(isArray == 1){
+                Reg_offset.my_offset.scope_var_num += Integer.parseInt(ar_num);
+            }
+            else{
+                Reg_offset.my_offset.scope_var_num += 1;
+            }
             
         }
         else{

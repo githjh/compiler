@@ -1,18 +1,23 @@
-int ar[size][size];
+int ar[25];
+int i,j ;
+int num;
+int size;
+int temp;
 
 int main(){
-	int i,j ;
-	int num;
-	int size;
-	size = 3;
-	for( i = 0, j = size/2, num = 1; num <= size*size; num++){
-		ar[i][j] = num;
-		if(num %size == 0){
-			i++;
+	size = 5;
+	j = size/2;
+	num = 1;
+	for( i = 0; num <= size*size; num = num + 1){
+		ar[i* size +j] = num;
+		temp = num / size;
+		if(temp * size - num == 0)
+		{
+			i = i +1;
 		}
 		else{
-			i--;
-			j++;
+			i = i -1;
+			j = j +1;
 		}
 		if(i<0){
 			i= size -1;
@@ -22,10 +27,10 @@ int main(){
 		}
 
 	}
-	for (i = 0 ; i<size; i++)
+	for (i = 0 ; i<size; i = i +1)
 	{
-		for(j= 0 ; j< size; j++){
-			printf(ar[i][j]);
+		for(j= 0 ; j< size; j = j + 1){
+			printf(ar[i*size +j]);
 		}
 	}
 }

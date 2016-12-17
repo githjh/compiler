@@ -34,20 +34,28 @@ public class Program extends Absyn {
     code_write("AREA VR");
     code_write("LAB START");
 
-    
-
-
-    //System.out.println(Reg_offset.my_offset.global_offset);
     code_write(String.format("MOVE %d SP", Reg_offset.my_offset.global_offset));
     code_write(String.format("MOVE %d FP", Reg_offset.my_offset.global_offset));
+    
+    String label_exit = "EXIT";
+    code_write(String.format("  MOVE %s MEM(SP@)",label_exit));
+    
+    code_write("  ADD 1 SP@ SP");
+    code_write("  MOVE FP@ MEM(SP@)");
+    code_write("  ADD 1 SP@ SP");
+    code_write("  MOVE SP@ FP");
+    //code_write("  ADD 1 SP@ SP");
+    
     
     code_write("JMP main");
     
     String print_function = ("LAB printf \n"
+                            +"  MOVE  FP@ SP\n"
                             +"  WRITE MEM(SP@(-3))@\n"
                             +"  MOVE  MEM(SP@(-1))@ FP\n"
                             +"  JMP   MEM(SP@(-2))@\n");
     String scanf_function = ("LAB scanf\n"
+                            +"  MOVE  FP@ SP\n"
                             +"  READI MEM(MEM(SP@(-3))@)\n"
                             +"  MOVE MEM(SP@(-1))@ FP\n"
                             +"  JMP MEM(SP@(-2))@\n");
@@ -58,16 +66,11 @@ public class Program extends Absyn {
     if(fl != null){
       fl.printCODE();
     }
+    code_write(String.format("  SUB SP@ %d SP",2));
 
     code_write("LAB EXIT");
+    
     code_write("LAB END");
 
-
-    //System.out.println("test2");
-    
-  //  System.out.println("test");
-  //  for(my_Symbol my_s : SymbolTable.getTable().s_table){
-  //    System.out.println(my_s.name);
-  //  }
 	}
 }

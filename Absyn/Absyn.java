@@ -96,6 +96,14 @@ class SymbolTable{
 		}
 		return null;
 	}
+	public static Function find_last_func(){
+		ArrayList<Function> func_table = SymbolTable.getTable().f_table;
+		int func_size = func_table.size();
+		if(func_size == 0){
+			return null;
+		}
+		return func_table.get(func_size-1);	
+	}
 	static public void removeTABLE(int scope_level){
 		ArrayList<my_Symbol> temp = SymbolTable.getTable().s_table;
 		int table_size = temp.size();

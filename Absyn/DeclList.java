@@ -59,20 +59,13 @@ public class DeclList extends Absyn{
 		}
 
 		for(Decl d : dl){
-		//	result = String.format("%4d", count);
-		//	myPrint.symWriter.write(result);
 			if(is_global == 1){
 				d.isGlobal = true;
 			}
 			else{
 
 			}
-
 			start_num = d.printSYM(start_num, scope_level);
-			if(is_global == 1){
-				Reg_offset.my_offset.global_offset += 1;
-			}
-		//	count ++;
 		}
 		num_local = Reg_offset.my_offset.scope_var_num;
 		Reg_offset.my_offset.scope_var_num = 0;
