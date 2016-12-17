@@ -70,7 +70,7 @@ class Ident extends Absyn
         if(isGlobal){
             my_s.offset = Reg_offset.my_offset.global_offset;
             if(isArray == 1){
-                System.out.println("reg global_offset : " + my_s.offset);
+                //System.out.println("reg global_offset : " + my_s.offset);
                 Reg_offset.my_offset.global_offset += Integer.parseInt(ar_num);
             }
             else{

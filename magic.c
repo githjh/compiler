@@ -2,9 +2,9 @@ int i,j ;
 int num;
 int size;
 int temp;
-int ar[100];
+int ar[9];
 int main(){
-	scanf(size);
+	size = 3;
 	j = size/2;
 	num = 1;
 	for( i = 0; num <= size*size; num = num + 1){
@@ -32,4 +32,5 @@ int main(){
 			printf(ar[i*size +j]);
 		}
 	}
+	return 0;
 }

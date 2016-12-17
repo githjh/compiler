@@ -1,7 +1,59 @@
 Student ID: 20120962
 Name      : Jaehyeong Ha
 
-Design acivation record template
+1. How to test this complier
+
+1)build
+
+	type ant
+
+2)run
+	java -classpath classes/ Absyn.Parser filename.c
+	
+	symentic analisis will be printed (Warning of Error Messege).
+
+	AST = tree.txt
+	symbol table = table.txt
+	code = code.T 
+
+3) clean
+	type ant clean
+
+4) sample T-machine code for C test programs with floating point expessions
+	
+	It can be checked by running example.c
+
+	It is part of mul function
+
+	LAB mul 
+	...
+	FMUL MEM(SP@(-2))@ MEM(SP@(-1))@ VR(6)
+	SUB SP@ 2 SP
+	F2I VR(6)@ VR(7)
+	MOVE VR(7)@ VR(0)
+	...
+
+	The return type of function mul is integer.
+	After floating point multiflication, it will be converted to integer.
+
+5) sample run (magic.c which is a homework2 code)
+
+	It will be print magic square of size 3.
+
+	All of overheads are set as 1.
+
+	# of Instruction (Program Size) :: 313
+	# of Instruction Execution  :      1985
+	 
+	 Sum of All Memory Segment ....
+        Memory Usage  :       101
+       Read Overhead  :      2532
+      Write Overhead  :      1602
+
+ant
+java -classpath classes Parse simple_if.c
+
+2. Design acivation record template
 
 - return address will be saved on MEM(FP@(-2))
 - Parameters and local variables can be accessed by using FP. 
@@ -51,3 +103,6 @@ Return Address
 
 - Global values are saved on the first of memory, and the order
 - I used a temporary variable when I caculate expression. It is saved on stack.
+
+
+

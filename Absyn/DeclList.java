@@ -73,7 +73,7 @@ public class DeclList extends Absyn{
 		return start_num;
 	}
 	public void printCODE(){
-		code_write("//DeclList");
+		//code_write("//DeclList");
 		code_write(String.format("  ADD %d SP@ SP",num_local));
 	}
 	

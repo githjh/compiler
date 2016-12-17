@@ -64,16 +64,16 @@ public class Program extends Absyn {
                             +"  READF MEM(MEM(SP@(-3))@)\n"
                             +"  MOVE MEM(SP@(-1))@ FP\n"
                             +"  JMP MEM(SP@(-2))@\n");
-    code_write(print_function);
-    code_write(scanf_function);
-    code_write(scanf_function_f);
+    
     //System.out.println(Reg_offset.my_offset.reg_offset);
     Reg_offset.my_offset.add_off();
     if(fl != null){
       fl.printCODE();
     }
     code_write(String.format("  SUB SP@ %d SP",2));
-
+    code_write(print_function);
+    code_write(scanf_function);
+    code_write(scanf_function_f);
     code_write("LAB EXIT");
     
     code_write("LAB END");

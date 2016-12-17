@@ -154,6 +154,7 @@ class Assign extends Absyn
             String ex_str = typetoString(ex_type);
 
             expr.printSYM(n, names, depth, is_func_comp, name_print);
+            expr.ExprValidCheck();
             if (in_expr != null){
                 in_expr.printSYM(n, names, depth, is_func_comp, name_print);
             }
@@ -203,10 +204,10 @@ class Assign extends Absyn
             }
         }
         if(save_symbol != null){
-            code_write("// Assign");
+            //code_write("// Assign");
             if(save_symbol.isGlobal){
                 if(in_expr != null){
-                    code_write("// Assign arr");
+                    //code_write("// Assign arr");
                     int arr_num;
                     in_expr.printCODE();
                     code_write(String.format("  ADD %d VR(%d)@ VR(%d)",
@@ -224,7 +225,7 @@ class Assign extends Absyn
             //local variable 
             else{
                 if(in_expr != null){
-                    code_write("// Assign arr");
+                    //code_write("// Assign arr");
                     int arr_num;
                     in_expr.printCODE();
                     code_write(String.format("  ADD %d VR(%d)@ VR(%d)",
@@ -277,7 +278,6 @@ class Call extends Absyn
     ArgList args;
     int line;
     int pos;
-    Assign scanf_assign;
     public Call(String n, ArgList al,int _line, int _pos)
     {
         name = n;
@@ -308,10 +308,7 @@ class Call extends Absyn
         }
         else if(name.equals("scanf")){
             args.printSYM(n, names, depth, is_func_comp, name_print); 
-            Expr id_expr = args.al.get(0);
-            //System.out.println("call scanf \n");
-            scanf_assign = new Assign(id_expr.name, id_expr.expr, id_expr, line, pos);
-            scanf_assign.printSYM(n, names, depth,is_func_comp, name_print, 0);
+            
             
         }
         else{
@@ -354,7 +351,7 @@ class Call extends Absyn
         Expr arg_expr;
         String label_return = "pos_"+Reg_offset.my_offset.label_offset;
         Reg_offset.my_offset.label_offset += 1;
-        code_write("//call");
+        //code_write("//call");
         //call by reference
         if (name.equals("scanf")){
             arg_expr = args.al.get(0);
@@ -421,6 +418,12 @@ class RetStmt extends Stmt
         expr.printSYM(n, names, depth, is_func_comp, name_print);
         
         save_function = SymbolTable.find_last_func();
+        int expr_type = expr.ty;
+        int func_type = save_function.t.typecheck();
+        if(expr_type != func_type){
+            System.out.println("Warning : "+expr.line+":"+expr.pos
+                    +" note: return type miss match");
+        }
         //System.out.println("RetStmt save_function + " + save_function.name);
     }
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth){}
@@ -431,7 +434,7 @@ class RetStmt extends Stmt
         int expr_type = expr.ty;
         int func_type = save_function.t.typecheck();
         int type_convert = 0;
-        System.out.println("\nfunction : " + save_function.name + " expr_type " + expr_type + " function type " + func_type);
+        //System.out.println("\nfunction : " + save_function.name + " expr_type " + expr_type + " function type " + func_type);
         if(expr_type == 1 && func_type == 0){
             type_convert = 1;
         }
@@ -1093,7 +1096,7 @@ class IDExpr extends Expr{
         if(save_symbol.isGlobal){
             if(isArray){
                 int arr_num;
-                code_write("//IDexpr arr");
+                //code_write("//IDexpr arr");
                 expr.printCODE();
                 code_write(String.format("  ADD VR(%d)@ %d VR(%d)",
                     expr.reg_num,save_symbol.offset,Reg_offset.my_offset.reg_offset));
@@ -1117,7 +1120,7 @@ class IDExpr extends Expr{
         else{
             if(isArray){
                 int arr_num;
-                code_write("//IDexpr arr");
+                //code_write("//IDexpr arr");
                 expr.printCODE();
                 code_write(String.format("  ADD VR(%d)@ %d VR(%d)",
                     expr.reg_num,save_symbol.offset,Reg_offset.my_offset.reg_offset));
