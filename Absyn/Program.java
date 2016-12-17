@@ -59,8 +59,14 @@ public class Program extends Absyn {
                             +"  READI MEM(MEM(SP@(-3))@)\n"
                             +"  MOVE MEM(SP@(-1))@ FP\n"
                             +"  JMP MEM(SP@(-2))@\n");
+    String scanf_function_f = ("LAB scanf_f\n"
+                            +"  MOVE  FP@ SP\n"
+                            +"  READF MEM(MEM(SP@(-3))@)\n"
+                            +"  MOVE MEM(SP@(-1))@ FP\n"
+                            +"  JMP MEM(SP@(-2))@\n");
     code_write(print_function);
     code_write(scanf_function);
+    code_write(scanf_function_f);
     //System.out.println(Reg_offset.my_offset.reg_offset);
     Reg_offset.my_offset.add_off();
     if(fl != null){

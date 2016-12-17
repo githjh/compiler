@@ -1,2 +1,53 @@
-1.Design acivation record template
+Student ID: 20120962
+Name      : Jaehyeong Ha
 
+Design acivation record template
+
+- return address will be saved on MEM(FP@(-2))
+- Parameters and local variables can be accessed by using FP. 
+- Before call a function, we have to save parameter values, return address and the old FP value. Parameters will be saved on STACK(=MEM) as order of function arguments. After that, the return address, and old FP will be saved. The stucture of Main memory will be the follwing:
+
+--------------   <- New FP, SP
+Old FP
+-------------- -1
+Return Address
+-------------- -2
+Parameter N
+-------------- -3
+....
+--------------
+Parameter 2
+--------------
+Parameter 1
+....
+
+ For example, there is a simple add function which returns sumation of two input parameters
+  ----------------------
+  int ADD(int a, int b){
+  	return a+b;
+  }
+  ----------------------
+  The value of parameter a is saved on MEM(FP@(-4)) and b is saved on MEM(FP@(-3)).
+
+- return value of function will be saved on VR(0).
+- Saving local variables is simillar to saving parameters. They are saved on STACK by declaration order.
+
+--------------  <- SP
+local var N
+-------------- +3
+....
+-------------- +2
+local var 2
+-------------- +1
+local var 1
+--------------   <- FP
+Old FP
+-------------- -1
+Return Address
+-------------- -2
+....
+
+ If you want to access local variable 2, then it can be done by accessing MEM(FP@(1)).
+
+- Global values are saved on the first of memory, and the order
+- I used a temporary variable when I caculate expression. It is saved on stack.

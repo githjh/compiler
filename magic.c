@@ -1,11 +1,10 @@
-int ar[25];
 int i,j ;
 int num;
 int size;
 int temp;
-
+int ar[100];
 int main(){
-	size = 5;
+	scanf(size);
 	j = size/2;
 	num = 1;
 	for( i = 0; num <= size*size; num = num + 1){
