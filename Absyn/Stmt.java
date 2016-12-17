@@ -227,6 +227,7 @@ class Call extends Absyn
     ArgList args;
     int line;
     int pos;
+    Assign scanf_assign;
     public Call(String n, ArgList al,int _line, int _pos)
     {
         name = n;
@@ -254,6 +255,14 @@ class Call extends Absyn
                 //arg_ty.getType();
             }
             args.printSYM(n,names,depth,is_func_comp,name_print);
+        }
+        else if(name.equals("scanf")){
+            args.printSYM(n, names, depth, is_func_comp, name_print); 
+            Expr id_expr = args.al.get(0);
+            System.out.println("call scanf \n");
+            scanf_assign = new Assign(id_expr.name, id_expr.expr, id_expr, line, pos);
+            scanf_assign.printSYM(n, names, depth,is_func_comp, name_print, 0);
+            
         }
         else{
             Function func = SymbolTable.find_func(name);
@@ -289,18 +298,28 @@ class Call extends Absyn
         return ty;
     }
     public void printCODE(){
-        
+        Expr arg_expr;
         String label_return = "pos_"+Reg_offset.my_offset.label_offset;
         Reg_offset.my_offset.label_offset += 1;
         code_write("//call");
-        if (args != null){
-            int i;
-            Expr arg_expr;
-            for (i = args.al.size() -1; i >= 0; i--){
-                arg_expr = args.al.get(i);
-                arg_expr.printCODE();
-                code_write(String.format("  MOVE VR(%d)@ MEM(SP@)",arg_expr.reg_num));
-                code_write("  ADD 1 SP@ SP");
+        //call by reference
+        if (name.equals("scanf")){
+            arg_expr = args.al.get(0);
+            System.out.println(arg_expr.name + " !!!!!!!!!");
+            code_write(String.format(" MOVE %d MEM(SP@)", arg_expr.get_MEM_addr()));
+            code_write("  ADD 1 SP@ SP");
+        }
+        //call by value;
+        else{
+            if (args != null){
+                int i;
+                
+                for (i = args.al.size() -1; i >= 0; i--){
+                    arg_expr = args.al.get(i);
+                    arg_expr.printCODE();
+                    code_write(String.format("  MOVE VR(%d)@ MEM(SP@)",arg_expr.reg_num));
+                    code_write("  ADD 1 SP@ SP");
+                }
             }
         }
         code_write(String.format("  MOVE %s MEM(SP@)",label_return));
@@ -805,6 +824,8 @@ class Expr extends Absyn
     int pos;
     int ty;
     int reg_num;
+    String name;
+    Expr expr;
     public void printAST(){};
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print){
@@ -825,6 +846,10 @@ class Expr extends Absyn
     public void printCODE(){
         System.out.println("EXPR printcode is not overrided");
 
+    }
+    public int get_MEM_addr(){
+        System.out.println("EXPR get mem addr is not overrided");
+        return 0;
     }
 }
 class Num extends Expr{
@@ -858,8 +883,7 @@ class Num extends Expr{
 
 }
 class IDExpr extends Expr{
-    String name;
-    Expr expr;
+    
     boolean isArray;
     my_Symbol save_symbol;
     public IDExpr(String n, Expr e, boolean isA, int _line, int _pos)
@@ -965,6 +989,19 @@ class IDExpr extends Expr{
        // System.out.println(save_symbol.offset);
        // System.out.println("test3");
         Reg_offset.my_offset.add_off();
+    }
+    public int get_MEM_addr(){
+        if(save_symbol.isGlobal){
+            return save_symbol.offset;
+        }
+        //parameters
+        else if(save_symbol.isParam){
+            return (-3 - save_symbol.offset);
+        }
+        //local variable
+        else{
+            return save_symbol.offset;
+        }
     }
 
 }
