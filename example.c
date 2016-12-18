@@ -66,5 +66,12 @@ int main(int b)
 		i  = i +1;
 	}
 	printf(multi(2,3));
+	printf(i);
+	if ( i <= 20){
+		printf (1);
+	}
+	else{
+		printf(0);
+	}
 	return 0;
 }

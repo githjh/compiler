@@ -57,20 +57,20 @@ java -classpath classes Parse simple_if.c
 
 - return address will be saved on MEM(FP@(-2))
 - Parameters and local variables can be accessed by using FP. 
-- Before call a function, we have to save parameter values, return address and the old FP value. Parameters will be saved on STACK(=MEM) as order of function arguments. After that, the return address, and old FP will be saved. The stucture of Main memory will be the follwing:
+- Before call a function, we have to save parameter values, return address and the old FP value. Parameters will be saved on STACK(=MEM) as reverse order of function arguments. After that, the return address, and old FP will be saved. The stucture of Main memory will be the follwing:
 
 --------------   <- New FP, SP
 Old FP
 -------------- -1
 Return Address
 -------------- -2
-Parameter N
+Parameter 1
 -------------- -3
-....
---------------
 Parameter 2
 --------------
-Parameter 1
+....
+--------------
+Parameter N
 ....
 
  For example, there is a simple add function which returns sumation of two input parameters
@@ -79,7 +79,7 @@ Parameter 1
   	return a+b;
   }
   ----------------------
-  The value of parameter a is saved on MEM(FP@(-4)) and b is saved on MEM(FP@(-3)).
+  The value of parameter a is saved on MEM(FP@(-3)) and b is saved on MEM(FP@(-4)).
 
 - return value of function will be saved on VR(0).
 - Saving local variables is simillar to saving parameters. They are saved on STACK by declaration order.
