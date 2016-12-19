@@ -15,6 +15,9 @@ int main(int a){
 			v3[c] = c;
 			printf(v3[c]);
 		}
+		printf(b);
+		printf(c);
+		printf(d);
 
 	}
 	return 0;
