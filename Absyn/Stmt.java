@@ -1598,6 +1598,7 @@ class CompStmt extends Stmt
         if (is_func_comp == 0)
             removeSYM(names, depth);
         SymbolTable.removeTABLE(scope_level +1);
+        Reg_offset.my_offset.scope_var_num = 0;
 
     }
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth)

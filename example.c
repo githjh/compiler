@@ -61,7 +61,10 @@ int main(int b)
 	}
 	while( i < 20){
 		int wh;
+		int wh2;
+		int wh3;
 		wh = i + 100;
+		wh3 = 0;
 		printf(wh);
 		i  = i +1;
 	}

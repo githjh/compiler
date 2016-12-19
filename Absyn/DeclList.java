@@ -68,7 +68,7 @@ public class DeclList extends Absyn{
 			start_num = d.printSYM(start_num, scope_level);
 		}
 		num_local = Reg_offset.my_offset.scope_var_num;
-		Reg_offset.my_offset.scope_var_num = 0;
+		
 		myPrint.symWriter.write("\r\n");
 		return start_num;
 	}
