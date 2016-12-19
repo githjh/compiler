@@ -20,5 +20,24 @@ int main(int a){
 		printf(d);
 
 	}
+	{
+		int c;
+		int d;
+		b = 3;
+		c = 2;
+		d = b *c;
+		printf(d);
+	}
+	{
+		int c[10];
+		int i;
+		b = 10;
+		for(i = 0; i< 10; i = i +1){
+			int tmp;
+			c[i] = i;
+			tmp = c[i] * b;
+			printf(tmp);
+		}
+	}
 	return 0;
 }

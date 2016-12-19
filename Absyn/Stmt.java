@@ -1584,6 +1584,7 @@ class CompStmt extends Stmt
     public void printSYM(int n, ArrayList<String> names, ArrayList<Integer> depth, 
         int is_func_comp, int name_print, int scope_level)
     {
+        int save_scope_var_num = Reg_offset.my_offset.scope_var_num;
         if (is_func_comp == 0)
         {
             addSYM(names, depth);
@@ -1598,7 +1599,7 @@ class CompStmt extends Stmt
         if (is_func_comp == 0)
             removeSYM(names, depth);
         SymbolTable.removeTABLE(scope_level +1);
-        Reg_offset.my_offset.scope_var_num = 0;
+        Reg_offset.my_offset.scope_var_num = save_scope_var_num;
 
     }
     public void addSYM(ArrayList<String> names, ArrayList<Integer> depth)
